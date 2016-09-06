@@ -70,19 +70,15 @@ angular.module('GoogleSpreadsheets', [])
 			return row;
 		};
 
-		function getSheets(key, accessToken) {
-			// using php proxy to avoid CORS fail
-			var url = 'http://odb.opendataresearch.org/proxy/proxy.php?https://spreadsheets.google.com/feeds/worksheets/' + key + '/private/full';
-
-			if(accessToken) {
-				url += '?access_token=' + accessToken;
-			}
-
+		function getSheets(key) {
+			var url = 'https://spreadsheets.google.com/feeds/worksheets/' + key + '/private/full';
+                        
 			var deferred = defer();
 
 			$http({ 
-				url: url,
-				timeoout: deferred
+				method: 'GET',
+                                url: '/google-spreadsheets.php?action=retreive&url=' + url,
+				timeout: deferred,
 			})
 				.success(function(data, status, headers, config) {
 					var xml = new DOMParser().parseFromString(data, "text/xml")
@@ -124,19 +120,14 @@ angular.module('GoogleSpreadsheets', [])
 			return deferred.promise;
 		};
 
-		function getRows(key, sheet, accessToken, useKey) {
-			// using php proxy to avoid CORS fail
-			var url = 'http://odb.opendataresearch.org/proxy/proxy.php?https://spreadsheets.google.com/feeds/list/' + key + '/' + sheet.id + '/private/full';
-
-			if(accessToken) {
-				url += '?access_token=' + accessToken;
-			}
+		function getRows(key, sheet, useKey) {
+			var url = 'https://spreadsheets.google.com/feeds/list/' + key + '/' + sheet.id + '/private/full';
 
 			var deferred = defer();
 
 			$http({
 				method: 'GET',
-				url: url,
+				url: '/google-spreadsheets.php?action=retreive&url=' + url,
 				timeout: deferred
 			})
 				.success(function(data, status, headers, config) {
@@ -173,7 +164,7 @@ angular.module('GoogleSpreadsheets', [])
 			return deferred.promise;
 		};
 
-		function updateRow(url, values, accessToken) {
+		function updateRow(url, values) {
 			var deferred = defer();
 			var parseResponse = function(data) {
 				var xml = new DOMParser().parseFromString(data, "text/xml");
@@ -184,7 +175,7 @@ angular.module('GoogleSpreadsheets', [])
 
 			$http({
 				method: 'POST',
-				url: '/submit.php?accessToken=' + accessToken + '&url=' + url + '&method=PUT',
+				url: '/google-spreadsheets.php?action=submit&url=' + url + '&method=PUT',
 				headers: {
 					'Content-Type': 'application/x-www-form-urlencoded'
 				},
@@ -207,13 +198,13 @@ angular.module('GoogleSpreadsheets', [])
 			return deferred.promise;
 		};
 
-		function insertRow(sheet, values, accessToken) {
+		function insertRow(sheet, values) {
 			var url = 'https://spreadsheets.google.com/feeds/list/' + sheet.key + '/' + sheet.id + '/private/full';
 			var deferred = defer();
 
 			$http({
 				method: 'POST',
-				url: '/submit.php?accessToken=' + accessToken + '&url=' + url + '&method=POST',
+				url: '/google-spreadsheets.php?action=submit&url=' + url + '&method=POST',
 				headers: {
 					'Content-Type': 'application/x-www-form-urlencoded'
 				},
@@ -233,12 +224,12 @@ angular.module('GoogleSpreadsheets', [])
 			return deferred.promise;
 		};
 
-		function deleteRow(url, accessToken, id) {
+		function deleteRow(url, id) {
 			var deferred = defer();
 
 			$http({
 				method: 'GET',
-				url: '/submit.php?accessToken=' + accessToken + '&url=' + url + '&method=DELETE',
+				url: '/google-spreadsheets.php?action=submit&url=' + url + '&method=DELETE',
 				headers: {
 					'Content-Type': 'application/x-www-form-urlencoded'
 				},

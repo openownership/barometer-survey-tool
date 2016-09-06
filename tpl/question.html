@@ -46,6 +46,7 @@
 	</div>
 
 	<div ng-if="question.wantexamples == 'Yes'" class="examples">
+            <span ng-if="(response['response'] == '0') || response['response']">
 		<label>
 			<span ng-hide="readOnly || commentOnly">Upload supporting files</span>
 			<span ng-if="(readOnly || commentOnly) && response.example.length">Supporting files</span>
@@ -53,6 +54,12 @@
 			<flexible-list collection="response.example" at-least="0" ng-disabled="readOnly || commentOnly" />
 			<p class="description">Note: Any uploaded files will be saved on your Google Drive and will be publicly accessible.</p>
 		</label>
+            </span>
+
+            <span ng-if="!response['response']">
+                        <span class="icon-plus">  </span>You can upload supporting files here once you have completed the required components of this question.
+            </span>
+ 
 	</div>
 
 	<div ng-if="supporting && !supporting.values || supporting.values.indexOf(response.response) > -1" ng-repeat="supporting in question.supporting" class="supporting">

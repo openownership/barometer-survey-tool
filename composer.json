@@ -1,0 +1,14 @@
+{ 
+    "name": "w3f/barometer",
+    "type": "webapp",
+    "description": "World Wide Web Foundation Barometer Survey Tool",
+    "keywords": ["w3f"],
+    "homepage": "http://webfoundation.org/",
+    "license": "MIT",
+    "require": {
+        "php": ">=5.2.1"
+    },
+    "require": {
+        "google/apiclient": "1.0.*@beta"
+    }
+}

@@ -1,4 +1,4 @@
-Web Index / Open Data Barometer Survey Tool
+Web Index / Open Data Barometer Survey Tool Dev Branch
 ==============
 
 This repository contains a custom application built to administer expert surveys, with a defined review process.
@@ -87,7 +87,7 @@ Notes:
 
 ### Set up the server side component
 
-(1) Checkout the code from https://github.com/TheWebFoundation/barometer-survey-tool and point a domain / subdomain to this directory
+(1) Checkout the code from https://github.com/practicalparticipation/barometer-survey-tool and point a domain / subdomain to this directory
 
 (2) Go to the Google Developer Console at https://console.developers.google.com and
 

@@ -22,5 +22,5 @@
 // SERVICE_ACCOUNT_NAME should be the email address for the service account
 // KEY_FILE_LOCATION should be a relative path to the location of the .p12 key
 // for the service account
-define('SERVICE_ACCOUNT_NAME', '');
-define('KEY_FILE_LOCATION', '');
+define('SERVICE_ACCOUNT_NAME', '333545842886-o72vrqsf58800nu1g9jdjjd1r564lp2k@developer.gserviceaccount.com');
+define('KEY_FILE_LOCATION', 'odb-ccad737d0c11.p12');

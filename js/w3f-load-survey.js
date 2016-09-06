@@ -29,7 +29,7 @@ angular.module('W3FSurveyLoader', [ 'GoogleSpreadsheets' ])
 		var loadControlValues = function() {
 			var q = $q.defer();
 
-			gs.getRows(answerKey, $rootScope.answerSheets.Control, $rootScope.accessToken, 'field').then(function(rows) {
+			gs.getRows(answerKey, $rootScope.answerSheets.Control, 'field').then(function(rows) {
 				_.each(rows, function(row, key) {
 					$rootScope.control[key] = row.value;
 					$rootScope.links.control[key] = row[':links'];
@@ -186,7 +186,7 @@ angular.module('W3FSurveyLoader', [ 'GoogleSpreadsheets' ])
 		var loadMaster = function() {
 			var q = $q.defer();
 
-			gs.getSheets(MASTER_KEY, $rootScope.accessToken).then(function(sheets) {
+			gs.getSheets(MASTER_KEY).then(function(sheets) {
 				// Check for required 'Sections' sheet
 				if(!sheets['Sections']) {
 					$rootScope.loading = false;
@@ -196,12 +196,12 @@ angular.module('W3FSurveyLoader', [ 'GoogleSpreadsheets' ])
 
 				// Load answer sheet and populate responses model
 				$rootScope.loading = "Loading Sections...";
-				gs.getRows(MASTER_KEY, sheets['Sections'], $rootScope.accessToken).then(function(sections) {
+				gs.getRows(MASTER_KEY, sheets['Sections']).then(function(sections) {
 					populateSections(sections);
 
 					$rootScope.loading = "Loading Questions...";
 
-					gs.getRows(MASTER_KEY, sheets['Questions'], $rootScope.accessToken).then(function(questions) {
+					gs.getRows(MASTER_KEY, sheets['Questions']).then(function(questions) {
 						populateQuestions(questions);
 
 						loadAnswerData(q);
@@ -234,7 +234,7 @@ angular.module('W3FSurveyLoader', [ 'GoogleSpreadsheets' ])
 
 				// Populate answers. This can be done in parralel with control data load
 				// since the data sets are distinct
-				gs.getRows(answerKey, $rootScope.answerSheets.Answers, $rootScope.accessToken).then(function(answers) {
+				gs.getRows(answerKey, $rootScope.answerSheets.Answers).then(function(answers) {
 					angular.forEach(answers, function(answer) {
 						if(!$rootScope.questions[answer.questionid]) {
 							console.log("Answer with qid=" + answer.questionid + " does not correspond to any survey question");
@@ -283,20 +283,20 @@ angular.module('W3FSurveyLoader', [ 'GoogleSpreadsheets' ])
 									collection.push(ex);
 
 									if(ex.url && ($rootScope.participant == 'Reviewer' || $rootScope.participant == 'Coordinator') ) {
-										var url = ex.url.replace('https://docs.google.com/file/d/', '');
+
+                                                                                var url = ex.url.replace('https://drive.google.com/file/d/', '');
 										url = url.split('/', 1);
 
 										var fileId = url[0];
-
 										$http({
 											method: 'GET',
-											url: '/drivecopy.php',
+											url: '/google-drive.php',
 											params: {
 												fileId: fileId,
 												email: $rootScope.userEmail,
 												action: 'grantPerms'
 											}
-										})
+                                                                                })
 										.error(function(data, status, headers, config){
 											console.log('Failed to grant access to resource');
 										});
@@ -321,7 +321,7 @@ angular.module('W3FSurveyLoader', [ 'GoogleSpreadsheets' ])
 				var q = $q.defer();
 
 				// Populate notes for each question
-				return gs.getRows(answerKey, $rootScope.answerSheets.Notes, $rootScope.accessToken).then(function(rows) {
+				return gs.getRows(answerKey, $rootScope.answerSheets.Notes).then(function(rows) {
 					_.each(rows, function(note) {
 						if(!$rootScope.notes[note.questionid]) {
 							console.log("Note with qid=" + note.questionid + " does not correspond to any survey question");
@@ -329,8 +329,9 @@ angular.module('W3FSurveyLoader', [ 'GoogleSpreadsheets' ])
 						}
 
 						// Avoid duplicate notes:
-						var notes = $rootScope.notes[note.questionid],
-						    lastNote = notes.length > 0 && notes[notes.length-1];
+						var notes = $rootScope.notes[note.questionid];
+                                                /*
+						var lastNote = notes.length > 0 && notes[notes.length-1];
 
 						if(!lastNote || lastNote && lastNote.note != note.note) {
 							if(!note.date && note.edited) {
@@ -338,6 +339,8 @@ angular.module('W3FSurveyLoader', [ 'GoogleSpreadsheets' ])
 							}
 							$rootScope.notes[note.questionid].push(note);
 						}
+                                                */
+                                                $rootScope.notes[note.questionid].push(note);
 					});
 
 					_.each($rootScope.sectionOrder, function(sectionid) {
@@ -351,7 +354,7 @@ angular.module('W3FSurveyLoader', [ 'GoogleSpreadsheets' ])
 			}
 
 			// Pull sheets from answer sheet and confirm they're all there.
-			gs.getSheets(answerKey, $rootScope.accessToken).then(function(sheets) {
+			gs.getSheets(answerKey).then(function(sheets) {
 				for(var sheet in $rootScope.answerSheets) {
 					if(!sheets[sheet]) {
 						loadError("Invalid answer sheet.")();
@@ -388,7 +391,7 @@ angular.module('W3FSurveyLoader', [ 'GoogleSpreadsheets' ])
 
 			if(answerKey) {
 				// Pull sheets from answer sheet and confirm they're all there.
-				gs.getSheets(answerKey, $rootScope.accessToken).then(function(sheets) {
+				gs.getSheets(answerKey).then(function(sheets) {
 					for(var sheet in $rootScope.answerSheets) {
 						if(!sheets[sheet]) {
 							$rootScope.error = "Invalid response data";

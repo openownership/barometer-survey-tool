@@ -23,13 +23,14 @@
  * This has addCommenter and removeCommenter support
  */
 
-var DOMAIN = 'webfoundation.org';
-
+var DOMAIN = 'barometer.lab.gent'; // previously webfoundation.org
+var SURVEYURL = 'http://barometer.lab.gent'; // previously http://odb.opendataresearch.org/
+var SERVICEACCOUNT = 'REPLACE_ME'; // service acct in dev console, e.g. 333545842886-o72vrqsf58800nu1g9jdjjd1r564lp2k@developer.gserviceaccount.com
 /**
  * Return the survey URL for a particular answer sheet key
  */
 function surveyUrl(key) {
-  return 'http://odb.opendataresearch.org/' + key;
+  return SURVEYURL + '?' + key;
 }
 
 /**
@@ -50,6 +51,10 @@ function getParticipants(country) {
       name: country.reviewerName,
       emails: country.reviewerEmail.split(/\s*,\s*/),
       states: [ 'review' ]
+    },
+    service: {
+      name: "serviceaccount",
+      emails: [ SERVICEACCOUNT ]
     }
   };
 }
@@ -76,7 +81,7 @@ function countryState(country) {
 }
 
 /**
- * Create new Answer sheet for a country from Answer template. 
+ * Create new Answer sheet for a country from Answer template.
  */
 function createAnswerSheet(country) {
   var ass = SpreadsheetApp.getActiveSpreadsheet(),
@@ -88,17 +93,17 @@ function createAnswerSheet(country) {
       newSheet, file;
 
   ass.toast("Creating answer sheet", country.name, -1);
-  
+
   newSheet = ss.copy("ODB 2015 Answers - " + country.name);
-  
+
   control.getRange("Q" + country.row).setValue(newSheet.getId());
   country.answerSheet = newSheet.getId();
 
-  // Copy to archive folder  
+  // Copy to archive folder
   file = DriveApp.getFileById(newSheet.getId());
-  folder.addFile(file);  
-  
-  return file.getId();  
+  folder.addFile(file);
+
+  return file.getId();
 }
 
 /**
@@ -140,11 +145,11 @@ function setupAnswerSheet(country, sheet) {
   }
 
   // Set the correct permissions for this sheet
-  ass.toast("Setting Answer sheet permissions...", country.name, -1);
+  ass.toast("Setting Answer sheet permissions...", country.name, 1);
 
   // Configure sharing. Make private, add editors, make DOMAIN-accessible.
-  var file = DriveApp.getFileById(sheet.getId()),
-      editors = sheet.getEditors();
+  var file = DriveApp.getFileById(sheet.getId());
+  var editors = file.getEditors();
 
   try {
     file.setShareableByEditors(true);
@@ -152,7 +157,7 @@ function setupAnswerSheet(country, sheet) {
   catch(e) {
     Logger.log("Failed to limit sharing by editors", e);
   }
-  
+
   file.setDescription("Read-only answer sheet for " + country.name + ". Please do not access this sheet directly: instead, use the survey found at " + surveyUrl(sheet.getId()));
 
   try {
@@ -201,9 +206,9 @@ function setupAnswerSheet(country, sheet) {
   catch(e) {
     Logger.log("Failed to limit sharing by editors", e);
   }
-  
-  
-  ass.toast('Done', country.name); 
+
+
+  ass.toast('Done', country.name);
 }
 
 
@@ -231,7 +236,7 @@ function refreshAnswerSheet(country, newStatus) {
     'Supporting4',
     'Supporting5'
    ];
-  
+
   var ass = SpreadsheetApp.getActiveSpreadsheet(),
       control = ass.getSheetByName('Control');
 
@@ -291,8 +296,9 @@ function refreshAnswerSheet(country, newStatus) {
 
       // Status has changed, due date has not. Update due date.
       if(dueDate == answerDue) {
-        setValue(answerControlSheet, "Status Due", newDueDate.toDateString());
-        control.getRange(country.row, 10).setValue(newDueDate.toDateString());
+        formattedNewDueDate = Utilities.formatDate(newDueDate, "GMT", "MM-dd-yyyy");
+        setValue(answerControlSheet, "Status Due", formattedNewDueDate);
+        control.getRange(country.row, 10).setValue(formattedNewDueDate);
       }
     }
     else {
@@ -323,7 +329,7 @@ function refreshAnswerSheet(country, newStatus) {
       cell.setValue(requiredColumns[i-1]);
     }
   }
-  
+
   for(var i = 0, answerRow; i < answerGrid.length, answerRow = answerGrid[i]; i++) {
     if(!answerRow.questionId) {
       continue;
@@ -339,7 +345,7 @@ function refreshAnswerSheet(country, newStatus) {
     if(!answers[question.sectionId]) {
       answers[question.sectionId] = 0;
     }
-    
+
     // Count non-empty, non-'-' answers  only
     if(!String(answerRow.response).match(/^(-|\s*)?$/)) {
       answers[question.sectionId]++;
@@ -412,7 +418,8 @@ function getDeadline(days_to_add, text) {
   days_to_add = days_to_add || 0;
 
   var currentTime = new Date();
-  var newTime = new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate() + days_to_add);
+  //var newTime = new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate() + days_to_add);
+  var newTime =  new Date(currentTime.getTime()+days_to_add*(24*3600*1000));
   var month = newTime.getMonth() + 1;
   var day = newTime.getDate();
   var year = newTime.getFullYear();
@@ -422,11 +429,18 @@ function getDeadline(days_to_add, text) {
     month = ["January","February","March","April","May","June","July","August","September","October","November","December"];
     return day + suffix[day-1] + " " + month[newTime.getMonth()] + " " + year;
   } else {
-    return day + "/" + month + "/" + year;
+    //return day + "/" + month + "/" + year;
+    return Utilities.formatDate(newTime, "GMT", "MM-dd-yyyy");
   }
 }
 
+function testDeadline() {
+  Logger.log(Utilities.formatDate(new Date(), "GMT", "MM-dd-yyyy"));
+}
+
+
 function archiveSheet(id, stage) {
+    Logger.log('Archiving ' + id + ' in stage ' + stage);
     var folderID = getConfig("archive_folder");
     // var sheet = DocsList.getFileById(id); -> DEPRECATED
     var sheet = DriveApp.getFileById(id);
@@ -458,7 +472,7 @@ function mailAlert(state, subs) {
     for(var sub in subs) {
       body = body.replace(new RegExp('%' + sub + '%', "g"), subs[sub]);
     }
-    
+
     email[s] = body;
   });
 
@@ -482,7 +496,7 @@ function mailAlert(state, subs) {
         catch(e) {
           Logger.log("There was an error getting the attachment `" + attachment_var + "` (" + getConfig(attachment_var) + ")");
         }
-  
+
         return false;
       }).filter(function(v) { return !!v; })
     });
@@ -498,7 +512,7 @@ function mailAlert(state, subs) {
    } catch(e) {
      ass.toast("Failed to send mail to " + email.recipients + ". Set into recruitment and back again to trigger mail", subs.country);
      Logger.log("There was an error sending mail to the researcher")}
-   }  
+   }
 
   ass.toast("Email sent to " + email.recipients, subs.country);
 }
@@ -510,7 +524,7 @@ function handleStateChange(country, state) {
       status = states[state];
 
   var subs = {};
-
+  Logger.log("handleStateChanged called with " + country + " and " + state);
   // Perform shallow-copy of country variables,
   for(var i in country) {
     subs[i] = country[i];
@@ -522,7 +536,8 @@ function handleStateChange(country, state) {
   subs.country = subs.name;
   subs.researcherGoogle = subs.researcherEmail.split(/,/)[0];
   subs.reviewerGoogle = subs.reviewerEmail.split(/,/)[0];
-
+  subs.selfAssessment = control.getRange(country.row, 19).getValue();
+  // ass.toast(subs.selfAssessment);
   // And all configuation sheet values
   var config = loadKVData(ass.getSheetByName("Config"));
 
@@ -602,7 +617,7 @@ function handleStateChange(country, state) {
 
     // Spot check
     case 'spotcheck':
-      archiveSheet(country.answerSheet, status);
+      archiveSheet(country.answerSheet, status.label);
 
       // Log
       addNote("Spot check by " + country.coordinatorName);
@@ -719,4 +734,3 @@ function authorise() {
   // DocsList.getFolderById(folderID); -> DEPRECATED
   DriveApp.getFolderById(folderID);
 }
-

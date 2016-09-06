@@ -256,7 +256,8 @@ button {
 
 	.question-Scale .scale-response,
 	.question-Scale .confidence {
-		margin-top: .5em;
+		margin-top: 1em;
+		margin-bottom: 1em;
 		font-size: 1.25em;
 		text-align: center;
 	}

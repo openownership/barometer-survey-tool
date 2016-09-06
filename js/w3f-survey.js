@@ -17,12 +17,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// previously:
+// var MASTER_KEY = '1K_WrEt2wbvcPAu7jMk60eGKoEmidpm5lzHqREN_ILs4';
+// var CLIENT_ID = '1083194213469-brjujs3utpn68cu618ur9f6idrncm2v6.apps.googleusercontent.com';
+// var SERVICE_ACCOUNT = '1083194213469-osgq2aiskq8qenu8e7rb8ndouo3f6shk@developer.gserviceaccount.com';
 
-var MASTER_KEY = '1K_WrEt2wbvcPAu7jMk60eGKoEmidpm5lzHqREN_ILs4';
-var CLIENT_ID = '1083194213469-brjujs3utpn68cu618ur9f6idrncm2v6.apps.googleusercontent.com';
-var SERVICE_ACCOUNT = '1083194213469-osgq2aiskq8qenu8e7rb8ndouo3f6shk@developer.gserviceaccount.com';
-var SCOPE = 'https://spreadsheets.google.com/feeds https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/drive.file';
-
+// Document ID of master control sheet
+var MASTER_KEY = 'REPLACE_ME';
+// OAuth 2.0 client ID for "Web application client" (set in developers console)
+var CLIENT_ID = 'REPLACE_ME';
 // Gimme a range op!
 Array.prototype.range = function(n) {
 	return Array.apply(null, Array(n)).map(function (_, i) {return i;});
@@ -64,8 +67,9 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 				if(matches[1] && (matches[1] == '](' || matches[1].substr(-1) == '<')) {
 					continue;
 				}
-
-				var markdownLink = '[' + matches[2] + '](' + matches[2] + ')';
+                                // escape underscores in link representation
+                                var linkTitle = matches[2].replace(/_/g,'\\_');
+				var markdownLink = '[' + linkTitle + '](' + matches[2] + ')';
 				input = input.replace(matches[2], markdownLink);
 				linkRegex.lastIndex += markdownLink.length - matches[2].length;
 			}
@@ -75,7 +79,7 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 	})
 
 	// Top-level controller
-	.controller('W3FSurveyController', [ 'loader', 'spreadsheets', 'gdrive', '$scope', '$rootScope', '$q', '$cookies', '$routeParams', '$interval', '$http', function(loader, gs, gdrive, $scope, $rootScope, $q, $cookies, $routeParams, $interval, $http) {
+	.controller('W3FSurveyController', [ 'loader', 'spreadsheets', '$scope', '$rootScope', '$q', '$cookies', '$routeParams', '$interval', '$http', function(loader, gs, $scope, $rootScope, $q, $cookies, $routeParams, $interval, $http) {
 		var answerKey = $routeParams.answerKey, queue;
 
 		if($routeParams.masterKey == 'clear') {
@@ -264,10 +268,10 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 					promise;
 
 			if($rootScope.links.control['Last Access']) {
-				promise = gs.updateRow($rootScope.links.control['Last Access'].edit, record, $rootScope.accessToken);
+				promise = gs.updateRow($rootScope.links.control['Last Access'].edit, record);
 			}
 			else {
-				promise = gs.insertRow($rootScope.answerSheets.Control, record, $rootScope.accessToken);
+				promise = gs.insertRow($rootScope.answerSheets.Control, record);
 			}
 
 			promise.then(function() {
@@ -281,7 +285,7 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 		$rootScope.unlockSurvey = function() {
 			// ADDED TO AVOID FAILING WHEN THE CONTROL DOES NOT EXIST
 			if($rootScope.links.control['Last Access']) {
-				gs.deleteRow($rootScope.links.control['Last Access'].edit, $rootScope.accessToken);
+				gs.deleteRow($rootScope.links.control['Last Access'].edit);
 			}
 		}
 
@@ -394,7 +398,8 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 				//
 				// Watch responses to add any changes to the save queue
 				_.each(_.keys($rootScope.questions), function(qid) {
-					$rootScope.$watchCollection("responses['" + qid + "']", function(newValue, oldValue) {
+
+                                        var watchResponses = function(newValue, oldValue) {
 						if(oldValue === newValue) {
 							return;
 						}
@@ -402,7 +407,12 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 						queue.responses[qid] = newValue;
 
 						localStorage['queue-' + answerKey] = JSON.stringify(queue);
-					});
+					};
+
+
+                                        $rootScope.$watchCollection("responses['" + qid + "']", watchResponses);
+                                        // Add equality watch for responses: needed to check for changes in examples
+                                        $rootScope.$watch("responses['" + qid + "']", watchResponses, true);
 
 					var watchNotes = function(newValue, oldValue) {
 						if(oldValue === newValue) {
@@ -428,6 +438,7 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 					// Also watch for changes in notes collections
 					$rootScope.$watchCollection("notes['" + qid + "']", watchNotes);
 					$rootScope.$watch("notes['" + qid + "']", watchNotes, true);
+
 				});
 
 				//
@@ -477,8 +488,8 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 								}, {
 									questionid: qid
 								});
-
 								// Copy over any supporting information
+                                                                // @TODO: read number of supporting columns from answer sheet!
 								for(var i = 0; i < 10; i++) {
 									if(values['supporting' + i]) {
 										record['supporting' + i] = values['supporting' + i];
@@ -486,7 +497,10 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 								}
 
 								// Munge examples from model structure
-								_.each(values.example, function(example, i) {
+                                                                // @TODO: read number of example columns from answer sheet!
+                                                                for (var i = 0; i < 5; i++) {
+                                                                    if (values.example && i in values.example) {
+                                                                        var example = values.example[i];
 									var ex = _.extend({}, {
 										url: '',
 											text: ''
@@ -502,15 +516,19 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 									else if(ex.title) {
 										record['example' + i] = ex.title;
 									}
-								});
+                                                                    } else {
+                                                                        // As per the Sheets API, an empty cell is represented by an empty string
+                                                                        record['example' + i] = '';
+                                                                    }
+								};
 
 								var promise;
 
 								if(links[qid]) {
-									promise = gs.updateRow(links[qid].edit, record, $rootScope.accessToken);
+									promise = gs.updateRow(links[qid].edit, record);
 								}
 								else {
-									promise = gs.insertRow($rootScope.answerSheets.Answers, record, $rootScope.accessToken);
+									promise = gs.insertRow($rootScope.answerSheets.Answers, record);
 								}
 
 								promise.then(function(row) {
@@ -530,7 +548,7 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 										note: note.note
 									};
 
-									var promise = gs.insertRow($rootScope.answerSheets.Notes, record, $rootScope.accessToken);
+									var promise = gs.insertRow($rootScope.answerSheets.Notes, record);
 
 									promise.then(function(row) {
 										note[':links'] = row[':links'];
@@ -547,7 +565,7 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 									var record = {
 										questionid: note.questionid,
 										date: note.date,
-										party: $rootScope.participant,
+										party: note.party,
 										field: note.field,
 										note: note.note,
 										edited: note.edited,
@@ -561,7 +579,7 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 										record.resolved = new Date().format();
 									}
 
-									var promise = gs.updateRow(note[':links'].edit, record, $rootScope.accessToken);
+									var promise = gs.updateRow(note[':links'].edit, record);
 
 									promise.then(function(row) {
 										if($rootScope.forceReadOnly) {
@@ -594,7 +612,7 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 
 									// Delete from answer sheet if it exists there
 									if(note[':links']) {
-										pq[qid] = gs.deleteRow(note[':links'].edit, $rootScope.accessToken, qid).then(complete, complete);
+										pq[qid] = gs.deleteRow(note[':links'].edit, qid).then(complete, complete);
 									}
 									else {
 										complete({ id: qid });
@@ -615,7 +633,6 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 
 							pq[qid].then(function(row) {
 								var qid = row.questionid || row.id;
-
 								size--;
 
 								if(size == 0) {
@@ -757,14 +774,14 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 				gs.updateRow($rootScope.links.control['Status'].edit, {
 					field: 'Status',
 					value: completing
-				}, $rootScope.accessToken)
-					.then(function() {
-						$rootScope.status = {
-							message: "Submitted!",
-							readOnly: "This survey is now read-only.",
-							success: true
-						}
-					});
+				})
+                                .then(function() {
+                                        $rootScope.status = {
+                                                message: "Submitted!",
+                                                readOnly: "This survey is now read-only.",
+                                                success: true
+                                        }
+                                });
 
 				$rootScope.unlockSurvey();
 				$rootScope.readOnly = true;
@@ -1039,7 +1056,7 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 	} ])
 
 	// A field for specifying a URL or a uploaded file
-	.directive('uploadableUrl', [ '$rootScope', '$http', 'gdrive', function($rootScope, $http, gdrive) {
+	.directive('uploadableUrl', [ '$rootScope', '$http', '$q', function($rootScope, $http, $q) {
 		return {
 			templateUrl: 'tpl/uploadable-url.html',
 			restrict: 'E',
@@ -1079,98 +1096,69 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 						return;
 					}
 
-					const boundary = '-------314159265358979323846';
-					const delimiter = "\r\n--" + boundary + "\r\n";
-					const close_delim = "\r\n--" + boundary + "--";
+                                        var fd = new FormData();
+                                        fd.append('file', file);
 
-					var reader = new FileReader();
-					reader.readAsBinaryString(file);
-					reader.onload = function(e) {
-						var contentType = file.type || 'application/octet-stream';
-						var metadata = {
-							'title': file.name,
-							'mimeType': contentType
-						};
+                                        $http({
+                                                method: 'POST',
+                                                url: '/google-drive.php',
+                                                params: {
+                                                    action: 'upload',
+                                                    filename: file.name,
+                                                    country: $rootScope.country
+                                                },
+                                                headers: {
+                                                    'Content-Type': undefined
+                                                },
+                                                transformRequest: angular.identity,
+                                                data: fd
+                                        }).then(
+                                                function uploadSuccess(results) {
+                                                    $scope.uploading = false;
+                                                    $scope.uploadState = "Uploaded";
 
-						var base64Data = btoa(reader.result);
-						var multipartRequestBody =
-								delimiter +
-								'Content-Type: application/json\r\n\r\n' +
-								JSON.stringify(metadata) +
-								delimiter +
-								'Content-Type: ' + contentType + '\r\n' +
-								'Content-Transfer-Encoding: base64\r\n' +
-								'\r\n' +
-								base64Data +
-								close_delim;
+                                                    $scope.model.fileId = results.data.id;
+                                                    $scope.model.url = results.data.alternateLink;
+                                                    $scope.model.title  = results.data.title;
+                                                    $scope.model.locked = true;
+                                                    $scope.model.uploaded = true;
 
-						var request = gapi.client.request({
-								'path': '/upload/drive/v2/files',
-								'method': 'POST',
-								'params': {'uploadType': 'multipart'},
-								'headers': {
-									'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
-								},
-								'body': multipartRequestBody
-						});
+                                                    // Grant Permissions
+                                                    var userPermPromise = $http({
+                                                            method: 'GET',
+                                                            url: '/google-drive.php',
+                                                            params: {
+                                                                action: 'grantPerms',
+                                                                file_id: results.data.id,
+                                                                email: $rootScope.userEmail
+                                                            },
+                                                    });
+                                                    var coordinatorEmail = $rootScope.control['Coordinator Email'];
+                                                    var coordinatorPermPromise = $http({
+                                                            method: 'GET',
+                                                            url: '/google-drive.php',
+                                                            params: {
+                                                                action: 'grantPerms',
+                                                                file_id: results.data.id,
+                                                                email: coordinatorEmail
+                                                            },
+                                                    });
 
-						$scope.uploadState = "Uploading...";
-						$scope.uploading = true;
+                                                    $q.all([userPermPromise, coordinatorPermPromise]).then(function () {
 
-						request.execute(function(results, status) {
-							status = JSON.parse(status);
-							status = status.gapiRequest.data;
+                                                    }, function() {
+                                                        $scope.uploadState = "Failed setting upload permissions! Try again.";
+                                                        $scope.model.locked = false;
+                                                        $scope.model.uploaded = false;
+                                                    });
 
-							$scope.uploading = false;
-
-							if(status.status == 200) {
-								$scope.uploadState = "Uploaded";
-								$scope.model.fileId = results.id;
-
-								// Give editor access to the service account to allow it to copy
-								// the uploaded file elsewhere through drivecopy.php
-								var promise = gdrive.insertPermission($scope.model.fileId, 'user', SERVICE_ACCOUNT, 'writer');
-
-								// Send file ID, name, and the survey country to the PHP proxy for
-								// futher file operations
-								promise.then(function(){
-									$http({
-										method: 'GET',
-										url: '/drivecopy.php',
-										params: {
-											fileId: $scope.model.fileId,
-											fileName: results.title,
-											country: $rootScope.country,
-											action: 'uploadNew'
-										}
-									})
-									.success(function(data, status, headers, config){
-										if(data.error) {
-											$scope.uploadState = "Upload Failed! " + data.error;
-											$scope.model.locked = false;
-											$scope.model.uploaded = false;
-										} else {
-											$scope.model.url = data.alternateLink;
-											$scope.model.title  = data.title;
-											$scope.model.locked = true;
-											$scope.model.uploaded = true;
-										}
-									})
-									.error(function(data, status, headers, config){
-										$scope.uploadState = "Upload Failed! " + data.error;
-										$scope.model.locked = false;
-										$scope.model.uploaded = false;
-									});
-								});
-							}
-							else {
-								$scope.uploadState = "Upload Failed! Try again.";
-								$scope.model.locked = false;
-								$scope.model.uploaded = false;
-							}
-						});
-					}
-				}
+                                                }, function uploadFailed(data, status, headers, config) {
+                                                    $scope.uploadState = "Upload Failed! Try again.";
+                                                    $scope.model.locked = false;
+                                                    $scope.model.uploaded = false;
+                                                }
+                                        );
+                                }
 			}
 		}
 	} ])
@@ -1368,98 +1356,71 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 				.find('iframe').attr('src', '');
 		});
 
-		window.gapi_authenticated = function(authResult) {
-			if($rootScope.showSignin === false) {
-				return;
-			}
+                window.init = function() {
+                    gapi.load('auth2', function() {
+                        auth2 = gapi.auth2.init({
+                            client_id: CLIENT_ID,
+                            fetch_basic_profile: true,
+                            scope: 'profile'
+                        });
 
-			if(!authResult || authResult.error) {
-				$rootScope.showSignin = true;
-				$rootScope.$digest();
-				return;
-			}
+                        // Listen for sign-in state changes.
+                        // auth2.isSignedIn.listen(signinChanged);
 
-			if(!authResult.status || !authResult.status.signed_in || $rootScope.accessToken) {
-				$rootScope.loading = false;
-				return;
-			}
+                        // Listen for changes to current user.
+                        // auth2.currentUser.listen(userChanged);
 
-			var authComplete = function() {
-				$rootScope.accessToken = authResult.access_token;
-				$rootScope.showSignin = false;
+                        // Sign in the user if they are currently signed in.
 
-				loadSurvey();
-			}
+                        auth2.then(function() {
+                            $rootScope.showSignin = true;
+                            $rootScope.$digest();
+                            gapi.signin2.render('signin2-button', {
+                                'scope': 'profile',
+                                'width': 220,
+                                'height': 50,
+                                'longtitle': true,
+                                'theme': 'dark',
+                                'onSuccess': signinSuccess,
+                                'onFailure': signinFailure
+                            });
+                        });
+                    });
+                };
 
-			var loadSurvey = function() {
-				$rootScope.loading = "Loading Survey...";
 
-				$rootScope.status = {
-					message: "Loading..."
-				};
+                window.signinChanged = function(val) {
+                    if (val) {
+                        showSurvey();
+                    } else {
+                        showSignin();
+                    }
+                };
 
-				$rootScope.$broadcast('load-survey');
-			}
+                window.userChanged = function(user) {
+                    if (user.isSignedIn()) {
+                        showSurvey();
+                    } else {
+                        showSignin();
+                    }
+                };
 
-			// Get the user's email address, then continue loading
-			if(!$rootScope.userEmail) {
-				gapi.client.load('oauth2', 'v2', function() {
-					gapi.client.oauth2.userinfo.get().execute(function(resp) {
-						$rootScope.userEmail = resp.email.toLowerCase();
 
-						authComplete();
-					});
-				});
+                window.signinSuccess = function() {
+                    var user = gapi.auth2.getAuthInstance().currentUser.get();
+                    $rootScope.userEmail = user.getBasicProfile().getEmail().toLowerCase();
+                    if ($rootScope.loading) {
+                        return;
+                    }
+                    $rootScope.showSignin = false;
+                    $rootScope.loading = "Loading Survey...";
+                    $rootScope.status = {
+                            message: "Loading..."
+                    };
+                    $rootScope.$broadcast('load-survey');
+                }
 
-				gapi.client.load('drive', 'v2');
-			}
-			else {
-				authComplete();
-			}
-
-			// Refresh the auth token at 75% of expires_in result
-			var refresh = function() {
-				gapi.auth.authorize({
-					client_id: CLIENT_ID,
-					scope: SCOPE,
-					immediate: true
-				}, setRefresh);
-			}
-
-			var setRefresh = function(authResult) {
-				if(!authResult || authResult.error) {
-					$rootScope.showSignin = true;
-					$rootScope.status = "Sign-in expired, please sign in again.";
-					return;
-				}
-
-				setTimeout(refresh, authResult.expires_in * .75 * 1000);
-			}
-
-			setRefresh(authResult);
-		};
-
-		window.gapi_authenticate = function() {
-			// render the sign-in button
-			gapi.signin.render('signin-button', {
-				clientid: CLIENT_ID,
-				scope: SCOPE,
-				cookiepolicy: 'single_host_origin',
-				callback: 'gapi_authenticated'
-			});
-		}
+                window.signinFailure = function() {
+                    // Do nothing
+                }
 	} ]);
-
-window.gapi_loaded = function() {
-	var timer;
-
-	if(window.gapi_authenticate) {
-		clearTimeout(timer);
-
-		window.gapi_authenticate();
-	}
-	else {
-		// Wait until it is...
-		var timer = setTimeout(gapi_loaded, 200);
-	}
-}
