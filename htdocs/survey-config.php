@@ -23,4 +23,4 @@
 // KEY_FILE_LOCATION should be a relative path to the location of the .p12 key
 // for the service account
 define('SERVICE_ACCOUNT_NAME', 'global-data-barometer-survey@global-data-barometer-survey.iam.gserviceaccount.com');
-define('KEY_FILE_LOCATION', 'global-data-barometer-survey-70b6ffbe06cd.p12');
+define('KEY_FILE_LOCATION', '../global-data-barometer-survey-70b6ffbe06cd.p12');

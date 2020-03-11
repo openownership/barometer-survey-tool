@@ -20,7 +20,7 @@
 <html ng-app="W3FWIS">
 	<head>
 		<base href="/" />
-		<title>World Wide Web Foundation Open Data Barometer 4th edition{{ country ? ' - ' + country : ''}}</title>
+		<title>Survey Tool{{ country ? ' - ' + country : ''}}</title>
 
                 
                 
@@ -60,14 +60,14 @@
 
 		<div id="wrapper" with-rail>
 			<header class="branding">
-				<h1>World Wide Web Foundation</h1>
-				<h2>Open Data Barometer - 4th edition{{ country ? ' - ' + country : '' }}</h2>
+				<h1>Survey Tool</h1>
+				<h2>{{ country ? ' - ' + country : '' }}</h2>
 			</header>
 
 			<div ng-if="error">{{ error }}</div>
 
 			<div id="sign-in" ng-show="showSignin && !error">
-				<p>Welcome to the 4th edition of the Open Data Barometer Survey. Sign in with your Google account to participate.</p>
+				<p>Welcome to the Survey Tool.</p>
 
 				<p><strong>VERY IMPORTANT NOTE:</strong> If you are accessing this survey on
 				a shared computer, please be sure to access this survey in
