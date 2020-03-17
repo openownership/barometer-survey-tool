@@ -20,7 +20,7 @@
 <html ng-app="W3FWIS">
 	<head>
 		<base href="/" />
-		<title>Survey Tool{{ country ? ' - ' + country : ''}}</title>
+		<title>{{ title }} {{ country ? ' - ' + country : ''}}</title>
 
                 
                 
@@ -60,7 +60,7 @@
 
 		<div id="wrapper" with-rail>
 			<header class="branding">
-				<h1>Survey Tool</h1>
+				<h1>{{ title }}</h1>
 				<h2>{{ country ? ' - ' + country : '' }}</h2>
 			</header>
 
