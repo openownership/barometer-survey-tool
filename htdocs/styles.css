@@ -476,9 +476,7 @@ button {
 }
 
 	.branding h1 {
-		padding-left: 186px;
-		width: 0;
-		overflow: hidden;
+		padding-left: 50px;
 		white-space: nowrap;
 		background-repeat: no-repeat;
 	}

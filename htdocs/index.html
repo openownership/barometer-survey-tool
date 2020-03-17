@@ -60,8 +60,8 @@
 
 		<div id="wrapper" with-rail>
 			<header class="branding">
-				<h1>{{ config.title }}</h1>
-				<h2>{{ country ? ' - ' + country : '' }}</h2>
+				<h1 style="background-image: url({{ config.logo }})">{{ config.title }}</h1>
+				<h2>{{ country ? country : '' }}</h2>
 			</header>
 
 			<div ng-if="error">{{ error }}</div>
