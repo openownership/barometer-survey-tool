@@ -480,8 +480,7 @@ button {
 		width: 0;
 		overflow: hidden;
 		white-space: nowrap;
-
-		float: left;
+		background-repeat: no-repeat;
 	}
 	.branding h2 {
 		line-height: 49px;
