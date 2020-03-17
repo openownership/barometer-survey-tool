@@ -194,7 +194,7 @@ angular.module('W3FSurveyLoader', [ 'GoogleSpreadsheets' ])
 				if(sheets['Config']) {
 					gs.getRows(MASTER_KEY, sheets['Config']).then(function(configuration) {
 						angular.forEach(configuration, function(row) {
-							$rootScope.config = [row['variable']] = row['value']
+							$rootScope.config[row['variable']] = row['value']
 						});
 					});
 
