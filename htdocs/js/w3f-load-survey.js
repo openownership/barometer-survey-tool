@@ -195,8 +195,9 @@ angular.module('W3FSurveyLoader', [ 'GoogleSpreadsheets' ])
 					gs.getRows(MASTER_KEY, sheets['Sections']).then(function(config) {
 						angular.forEach(config, function(row) {
 							$rootScope.config[row['Variable']] = row['Value']
-						}
-					}
+						});
+					});
+
 				} 
 
 				// Check for required 'Sections' sheet
