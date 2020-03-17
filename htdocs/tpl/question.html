@@ -25,17 +25,16 @@
 
 	<div class="question-title">
 		<h3>
-			{{ question.questionid.split('.').reverse()[0]}}: <em><label for="question-{{ question.questionid }}">{{ question.question }}</label></em>
+			<span ng-if="!config.hide_question_id">{{ question.questionid.split('.').reverse()[0]}}</span>: <em><label for="question-{{ question.questionid }}">{{ question.question }}</label></em>
 		</h3>
 	</div>
 
 	<div ng-if="question.type == 'Radio'" class="reponse radio">
 		<notes ng-if="!anonymous" field="'response'" />
-		<span ng-repeat="option in question.option">
-			<input type='radio' name="{{question.questionid}}" id="{{question.questionid}}-{{ option.id }}" value="{{ option.id }}" ng-model="response.response">
-			<label for="{{question.questionid}}-{{ option.id }}">{{ option.content }}</label>
-		</span>
-
+			<label for="{{question.questionid}}-{{ option.id }}" ng-repeat="option in question.option">
+				<input type='radio' name="{{question.questionid}}" id="{{question.questionid}}-{{ option.id }}" value="{{ option.content }}" ng-model="response.response">
+				<{{ option.content }}
+			</label>
 	</div>
 	
 
@@ -75,7 +74,7 @@
  
 	</div>
 
-	<div ng-if="supporting && !supporting.values || supporting.values.indexOf(response.response) > -1" ng-repeat="supporting in question.supporting" class="supporting">
+	<div ng-if="supporting && !supporting.values || supporting.values.indexOf(response.response) > -1" ng-repeat="supporting in question.supporting" class="supporting supporting-{{ suporting.id }}">
 		<notes ng-if="!anonymous" field="$parent.supporting.id" />
 
 		<label>
