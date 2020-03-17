@@ -1,4 +1,4 @@
-<div class="open-notes" title="{{ notes.length }} comments" ng-class="{ 'with-notes': notes.length > 0 || threadOrder.length > 0, 'with-unresolved-notes': notes.length > 0 }" ng-click="$rootScope.$broadcast('close-notes'); opened=!opened" id="note-{{ question.qid }}-{{ field }}">
+<div class="open-notes" title="{{ notes.length }} comments" ng-class="{ 'with-notes': notes.length > 0 || threadOrder.length > 0, 'with-unresolved-notes': notes.length > 0 }" ng-click="$rootScope.$broadcast('close-notes'); opened=!opened" id="note-{{ question.qid }}-{{ field }}" ng-if="!config.hide_notes">
 	<span class="icon-bubble"></span> 
 </div>
 
