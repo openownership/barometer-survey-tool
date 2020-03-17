@@ -7,7 +7,7 @@
 	</div>
 	
 	<div ng-if="question.type == 'Option'" class="response">
-		<notes ng-if="!anonymous && !config.hide_notes" field="'response'" />
+		<notes ng-if="!anonymous && !(config.hide_notes == 'TRUE')" field="'response'" />
 		<label class="confidence-level">
 			<span>Answer:</span>
 			<fancy-select ng-options="item.weight.toString() as item.content for item in question.option" ng-model="response.response" class="answer-select option-select" id="question-{{ question.questionid }}" with-null="-" ng-disabled="readOnly || commentOnly" /> 
@@ -15,7 +15,7 @@
 	</div>
 
 	<div ng-if="question.type == 'Description'" class="response">
-		<notes ng-if="!anonymous && !config.hide_notes" field="'response'" />
+		<notes ng-if="!anonymous && !(config.hide_notes == 'TRUE')" field="'response'" />
 	</div>
 
 	
@@ -30,7 +30,7 @@
 	</div>
 
 	<div ng-if="question.type == 'Radio'" class="reponse radio">
-		<notes ng-if="!anonymous && !config.hide_notes == FALSE" field="'response'" />
+		<notes ng-if="!anonymous && !(config.hide_notes == 'TRUE') == FALSE" field="'response'" />
 			<label for="{{question.questionid}}-{{ option.id }}" ng-repeat="option in question.option">
 				<input type='radio' name="{{question.questionid}}" id="{{question.questionid}}-{{ option.id }}" value="{{ option.content }}" ng-model="response.response">
 				{{ option.content }}
@@ -45,7 +45,7 @@
 	<div ng-if="(question.wantjustification !== 'Yes') && question.justificationnote" ng-bind-html="question.justificationnote | markdown"></div>
 
 	<div ng-if="question.wantjustification == 'Yes'" class="justification">
-		<notes ng-if="!anonymous && !config.hide_notes" field="'justification'" />
+		<notes ng-if="!anonymous && !(config.hide_notes == 'TRUE')" field="'justification'" />
 
 		<h4 ng-if="question.type !== 'Description'">Justification and sources (include URLs)</h4>
 
@@ -75,7 +75,7 @@
 	</div>
 
 	<div ng-if="supporting && !supporting.values || supporting.values.indexOf(response.response) > -1" ng-repeat="supporting in question.supporting" class="supporting supporting-{{ supporting.id }}">
-		<notes ng-if="!anonymous && !config.hide_notes" field="$parent.supporting.id" />
+		<notes ng-if="!anonymous && !(config.hide_notes == 'TRUE')" field="$parent.supporting.id" />
 
 		<label>
 			<div ng-bind-html="supporting.content | markdown"></div>
@@ -86,7 +86,7 @@
 
 	<div ng-if="question.type == 'Scale'" class="scale-response">
 		<span class="score-container">
-			<notes ng-if="!anonymous && !config.hide_notes" field="'response'" />
+			<notes ng-if="!anonymous && !(config.hide_notes == 'TRUE')" field="'response'" />
 
 			<label>
 				Score:
@@ -103,7 +103,7 @@
 	</div>
 
 	<div ng-if="question.hasprivatenotes == 'Yes'" class="private-notes">
-		<notes ng-if="!anonymous && !config.hide_notes" field="'privateNotes'" />
+		<notes ng-if="!anonymous && !(config.hide_notes == 'TRUE')" field="'privateNotes'" />
 		<h4>Private notes: for reviewer / coordinator only.</h4>
 
 		<textarea ng-model="response.privatenotes" ng-disabled="readOnly || commentOnly"></textarea>
