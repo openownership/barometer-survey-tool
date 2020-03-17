@@ -191,7 +191,7 @@ angular.module('W3FSurveyLoader', [ 'GoogleSpreadsheets' ])
 				// Get basic configuration, replacing with defaults it none-specified
 				$rootScope.config = {'title':'Survey tool','logo':''}
 
-				if(!sheets['Config']) {
+				if(sheets['Config']) {
 					gs.getRows(MASTER_KEY, sheets['Sections']).then(function(config) {
 						angular.forEach(config, function(row) {
 							$rootScope.config[row['Variable']] = row['Value']
