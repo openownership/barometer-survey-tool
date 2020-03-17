@@ -187,6 +187,19 @@ angular.module('W3FSurveyLoader', [ 'GoogleSpreadsheets' ])
 			var q = $q.defer();
 
 			gs.getSheets(MASTER_KEY).then(function(sheets) {
+				
+				// Get basic configuration, replacing with defaults it none-specified
+				$rootScope.config = {'title':'Survey tool','logo':''}
+
+				if(sheets['Config']) {
+					gs.getRows(MASTER_KEY, sheets['Config']).then(function(configuration) {
+						angular.forEach(configuration, function(row) {
+							$rootScope.config[row['variable']] = row['value']
+						});
+					});
+
+				} 
+
 				// Check for required 'Sections' sheet
 				if(!sheets['Sections']) {
 					$rootScope.loading = false;

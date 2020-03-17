@@ -478,9 +478,6 @@ button {
 	.branding h1 {
 		padding-left: 186px;
 		width: 0;
-		height: 49px;
-		background: url(logo.png);
-		background-size: 186px 49px;
 		overflow: hidden;
 		white-space: nowrap;
 
