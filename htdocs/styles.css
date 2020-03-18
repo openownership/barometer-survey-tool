@@ -838,6 +838,9 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b2e1ff', end
 		cursor: pointer;
 	}
 
+/*
+* Customisations for OpenOwnership
+*/
 div.radio {
 	margin-left:1.5em;
 }
@@ -845,4 +848,24 @@ div.radio {
 label.radio-label {
 	display:inline-block;
 	width:20%;
+}
+
+.question .supporting {
+		clear: both;
+		border-top: 1px solid lightgrey;
+}
+
+.answer-sum {
+	font-size:1em;
+}
+
+div.Legal, div.Systems, div.Data {
+    max-width: 30%;
+    float: left;
+    clear: right;
+}
+
+div.Legal label, div.Systems label, div.Data label {
+    display: block;
+    width: 100%;
 }
