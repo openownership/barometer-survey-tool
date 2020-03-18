@@ -887,12 +887,16 @@ div.Legal label, div.Systems label, div.Data label {
 }
 
 .justification {
-    width: 48%;
+    width: 45%;
     float: left;
     clear: none;
+    display: inline-block;
+    margin: 1em;
 }
 
 .question .examples {
-    width: 48%;
+    width: 45%;
     clear: none;
+    display: inline-block;
+    margin: 1em;
 }
