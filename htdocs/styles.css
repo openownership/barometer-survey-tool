@@ -837,3 +837,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b2e1ff', end
 		border-bottom: 1px solid #ccc;
 		cursor: pointer;
 	}
+
+div.radio {
+	margin-left:1.5em;
+
+}

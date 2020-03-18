@@ -32,7 +32,7 @@
 	<div ng-if="question.type == 'Radio'" class="reponse radio">
 		<notes ng-if="!anonymous && !(config.hide_notes == 'TRUE') == FALSE" field="'response'" />
 			<label for="{{question.questionid}}-{{ option.id }}" ng-repeat="option in question.option">
-				<input type='radio' name="{{question.questionid}}" id="{{question.questionid}}-{{ option.id }}" value="{{ option.content }}" ng-model="response.response">
+				<input type='radio' name="{{question.questionid}}" id="{{question.questionid}}-{{ option.id }}" value="{{ $index }}" ng-model="response.response">
 				{{ option.content }}
 			</label>
 	</div>
