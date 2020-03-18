@@ -873,3 +873,16 @@ div.Legal label, div.Systems label, div.Data label {
 .justification {
 	clear:both;
 }
+
+.supporting-supporting0 textarea {
+    width: 70%;
+    display: inline-block;
+    clear: none;
+    height:2.5em; 
+}
+
+.supporting-supporting0 div {
+    width:30%;
+    float:left;
+
+}
