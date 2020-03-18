@@ -16,7 +16,7 @@
 	<div class="uploadable-url-preview-url" ng-if="model.locked">
 		<input type="text" ng-model="model.title" ng-show="model.uploaded && !(disabled)" placeholder="{{ placeholder }}" />
 		<a class="uploadable-url-preview-url" href="{{ model.url }}" ng-if="disabled" target="uploadedPreview">{{ model.title }}</a>
-		<span class="uploadable-url-preview-url">{{ model.url }}</span>
+		<span class="uploadable-url-preview-url"><a href="{{ model.url }}" target="_blank">{{ model.url }}</a></span>
 	</div>
 </div>
 
