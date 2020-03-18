@@ -30,7 +30,7 @@
 	</div>
 
 
-	<ng-include src="'tpl/question.html'" ng-repeat="question in question.subquestions" ng-if="(question.subquestionfirst =='Yes')"></ng-include>
+	<ng-include src="'tpl/question.html'" ng-repeat="question in question.subquestions" ng-if="(question.subquestionsfirst =='Yes')"></ng-include>
 
 	<div ng-if="question.type == 'Radio'" class="reponse radio">
 		<notes ng-if="!anonymous && !(config.hide_notes == 'TRUE') == FALSE" field="'response'" />
@@ -112,5 +112,5 @@
 		<textarea ng-model="response.privatenotes" ng-disabled="readOnly || commentOnly"></textarea>
 	</div>
 
-	<ng-include src="'tpl/question.html'" ng-repeat="question in question.subquestions" ng-if="!(question.subquestionfirst =='Yes')"></ng-include>
+	<ng-include src="'tpl/question.html'" ng-repeat="question in question.subquestions" ng-if="!(question.subquestionsfirst =='Yes')"></ng-include>
 </div>
