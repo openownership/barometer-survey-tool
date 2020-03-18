@@ -884,5 +884,15 @@ div.Legal label, div.Systems label, div.Data label {
 .supporting-supporting0 div {
     width:30%;
     float:left;
+}
 
+.justification {
+    width: 48%;
+    float: left;
+    clear: none;
+}
+
+.question .examples {
+    width: 48%;
+    clear: none;
 }
