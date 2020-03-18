@@ -29,8 +29,9 @@
 		</h3>
 	</div>
 
-
-	<ng-include src="'tpl/question.html'" ng-repeat="question in question.subquestions" ng-if="(question.subquestionsfirst =='Yes')"></ng-include>
+	<div ng-if="question.subquestionsfirst =='Yes'">
+		<ng-include src="'tpl/question.html'" ng-repeat="question in question.subquestions"></ng-include>
+	</div>
 
 	<div ng-if="question.type == 'Radio'" class="reponse radio">
 		<notes ng-if="!anonymous && !(config.hide_notes == 'TRUE') == FALSE" field="'response'" />
@@ -44,6 +45,34 @@
 	<p ng-if="question.helplink" class="helplink">
 		<a href="{{question.helplink}}" target="w3f-guidance">Further question guidance &rarr;</a>
 	</p>
+
+	<div ng-if="supporting && !supporting.values || supporting.values.indexOf(response.response) > -1" ng-repeat="supporting in question.supporting" class="supporting supporting-{{ supporting.id }}">
+		<notes ng-if="!anonymous && !(config.hide_notes == 'TRUE')" field="$parent.supporting.id" />
+
+		<label>
+			<div ng-bind-html="supporting.content | markdown"></div>
+
+			<textarea ng-model="response[supporting.id]" ng-disabled="readOnly || commentOnly"></textarea>
+		</label>
+	</div>
+
+	<div ng-if="question.type == 'Scale'" class="scale-response">
+		<span class="score-container">
+			<notes ng-if="!anonymous && !(config.hide_notes == 'TRUE')" field="'response'" />
+
+			<label>
+				Score:
+				<fancy-select ng-model="response.response" class="answer-select scale-select" id="question-{{ question.questionid }}" ng-options="val.toString() as val for val in [].range(11)" with-null="-" ng-disabled="readOnly || commentOnly" />
+			</label>
+		</span>
+	</div>
+
+	<div ng-if="question.guidance.length" class="guidance-container">
+		<h4>Guidance:</h4>
+
+		<div class="guidance" ng-repeat="guidance in question.guidance" ng-style="{ width: (100 / question.guidance.length) + '%' }" ng-bind-html="(question.guidance.length > 1 ? guidance.weight + ' - ' : '') + guidance.content | markdown">
+		</div>
+	</div>
 
 	<div ng-if="(question.wantjustification !== 'Yes') && question.justificationnote" ng-bind-html="question.justificationnote | markdown"></div>
 
@@ -75,34 +104,6 @@
                         <span class="icon-plus">  </span>You can upload supporting files here once you have completed the required components of this question.
             </span>
  
-	</div>
-
-	<div ng-if="supporting && !supporting.values || supporting.values.indexOf(response.response) > -1" ng-repeat="supporting in question.supporting" class="supporting supporting-{{ supporting.id }}">
-		<notes ng-if="!anonymous && !(config.hide_notes == 'TRUE')" field="$parent.supporting.id" />
-
-		<label>
-			<div ng-bind-html="supporting.content | markdown"></div>
-
-			<textarea ng-model="response[supporting.id]" ng-disabled="readOnly || commentOnly"></textarea>
-		</label>
-	</div>
-
-	<div ng-if="question.type == 'Scale'" class="scale-response">
-		<span class="score-container">
-			<notes ng-if="!anonymous && !(config.hide_notes == 'TRUE')" field="'response'" />
-
-			<label>
-				Score:
-				<fancy-select ng-model="response.response" class="answer-select scale-select" id="question-{{ question.questionid }}" ng-options="val.toString() as val for val in [].range(11)" with-null="-" ng-disabled="readOnly || commentOnly" />
-			</label>
-		</span>
-	</div>
-
-	<div ng-if="question.guidance.length" class="guidance-container">
-		<h4>Guidance:</h4>
-
-		<div class="guidance" ng-repeat="guidance in question.guidance" ng-style="{ width: (100 / question.guidance.length) + '%' }" ng-bind-html="(question.guidance.length > 1 ? guidance.weight + ' - ' : '') + guidance.content | markdown">
-		</div>
 	</div>
 
 	<div ng-if="question.hasprivatenotes == 'Yes'" class="private-notes">
