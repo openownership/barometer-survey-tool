@@ -1,4 +1,4 @@
-<div class="question question-{{ question.type }}" ng-init="response = responses[question.questionid]">
+<div class="question question-{{ question.type }} {{ question.cssclass }}" ng-init="response = responses[question.questionid]">
 	<div class="confidence" ng-if="question.wantconfidence == 'Yes'">
 		<label class="confidence-level">
 			<span>Confidence:</span>
@@ -36,7 +36,7 @@
 	<div ng-if="question.type == 'Radio'" class="reponse radio">
 		<notes ng-if="!anonymous && !(config.hide_notes == 'TRUE') == FALSE" field="'response'" />
 			<label for="{{question.questionid}}-{{ option.id }}" ng-repeat="option in question.option" class="radio-label">
-				<input type='radio' name="{{question.questionid}}" id="{{question.questionid}}-{{ option.id }}" value="{{ $index }}" ng-model="response.response">
+				<input type='radio' name="{{question.questionid}}" id="{{question.questionid}}-{{ option.id }}" value="{{ $index }}" ng-model="response.response" ng-disabled="readOnly || commentOnly">
 				{{ option.content }}
 			</label>
 	</div>

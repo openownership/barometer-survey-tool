@@ -840,5 +840,9 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b2e1ff', end
 
 div.radio {
 	margin-left:1.5em;
+}
 
+label.radio-label {
+	display:inline-block;
+	width:20%;
 }
