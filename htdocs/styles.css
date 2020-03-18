@@ -869,3 +869,7 @@ div.Legal label, div.Systems label, div.Data label {
     display: block;
     width: 100%;
 }
+
+.justification {
+	clear:both;
+}
