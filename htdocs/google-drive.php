@@ -134,17 +134,15 @@ function uploadFile($service, $uploadedfile, $country = false) {
     $file = new Google_Service_Drive_DriveFile();
     $title = ($country) ? $country . ' - ' . $uploadedfile['name'] : $uploadedfile['name'];
     $file->setName($title);    
-    $parent = new Google_Service_Drive_ParentReference();
-    $parent->setId('1hZFdzyb6dcTJeETnTHqjW4taRr-G-CQI')
-    $file->setParents(array($parent));
-
+    
     try {
             $result = $service->files->create(
                     $file,
                     array(
                       'data' => file_get_contents($uploadedfile['tmp_name']),
                       'mimeType' => 'application/octet-stream',
-                      'uploadType' => 'multipart'
+                      'uploadType' => 'multipart',
+                      'parents' => array('1hZFdzyb6dcTJeETnTHqjW4taRr-G-CQI')
                     )
             );
             $result = $service->files->get($result->id, array('fields'=>'*'));
