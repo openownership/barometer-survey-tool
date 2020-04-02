@@ -109,7 +109,7 @@ function grantPermissions($service, $email, $file_id, $type, $role) {
     $newPermission->setEmailAddress( $email );
 
     try {
-            $perm = $service->permissions->insert( $file_id, $newPermission, array('sendNotificationEmails' => false) );
+            $perm = $service->permissions->create( $file_id, $newPermission, array('sendNotificationEmails' => false) );
             exit( json_encode( $perm ) );
     } catch ( Exception $e ) {
             $response = array(
