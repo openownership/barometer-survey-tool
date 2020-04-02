@@ -17,15 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// previously:
-// var MASTER_KEY = '1K_WrEt2wbvcPAu7jMk60eGKoEmidpm5lzHqREN_ILs4';
-// var CLIENT_ID = '1083194213469-brjujs3utpn68cu618ur9f6idrncm2v6.apps.googleusercontent.com';
-// var SERVICE_ACCOUNT = '1083194213469-osgq2aiskq8qenu8e7rb8ndouo3f6shk@developer.gserviceaccount.com';
-
-// Default document ID of survey definition
-var MASTER_KEY = '1swvsyWl0i36cH61tGvBAS8F7MtZG_i2n1-0MLH86l10';
-// OAuth 2.0 client ID for "Web application client" (set in developers console)
-var CLIENT_ID = '756731537499-2ci2osiqgmquikgl7be01gcvgb78j5fd.apps.googleusercontent.com';
 // Gimme a range op!
 Array.prototype.range = function(n) {
 	return Array.apply(null, Array(n)).map(function (_, i) {return i;});
