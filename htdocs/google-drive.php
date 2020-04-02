@@ -144,7 +144,7 @@ function uploadFile($service, $uploadedfile, $country = false) {
                       'uploadType' => 'multipart'
                     )
             );
-            $result = $service->files->get($result->id);
+            $result = $service->files->get($result->id, array('fields'=>'*'));
             exit(json_encode($result));  
     } catch ( Exception $e ) {
             $response = array(

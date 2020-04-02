@@ -1109,8 +1109,8 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
                                                     $scope.uploadState = "Uploaded";
 
                                                     $scope.model.fileId = results.data.id;
-                                                    $scope.model.url = results.data.alternateLink;
-                                                    $scope.model.title  = results.data.title;
+                                                    $scope.model.url = results.data.webViewLink;
+                                                    $scope.model.title  = results.data.name;
                                                     $scope.model.locked = true;
                                                     $scope.model.uploaded = true;
 
