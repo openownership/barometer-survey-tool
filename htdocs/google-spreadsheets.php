@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once dirname(__FILE__) . '../vendor/autoload.php';
+require_once dirname(__FILE__) . '/../vendor/autoload.php';
 require_once dirname(__FILE__) . '/survey-config.php';
 
 
@@ -47,8 +47,8 @@ if ( isset( $_SESSION['service_token'] ) ) {
 $client->setAuthConfig(SERVICE_ACCOUNT);
 
 // @TODO Check for invalid (revoked)token as well 
-if( $client->getAuth()->isAccessTokenExpired()) {
-	$client->getAuth()->refreshTokenWithAssertion( $credentials );
+if( $client->isAccessTokenExpired()) {
+	$client->refreshTokenWithAssertion();
 }
 $access_token = json_decode($client->getAccessToken())->access_token;
 

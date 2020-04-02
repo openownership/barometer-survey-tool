@@ -24,3 +24,4 @@
 // for the service account
 define('SERVICE_ACCOUNT_NAME', 'X@X.iam.gserviceaccount.com');
 define('KEY_FILE_LOCATION', '../xxxxxxx.p12');
+define('SERVICE_ACCOUNT','../xxxxx.json')
