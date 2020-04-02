@@ -29,17 +29,10 @@ require_once dirname(__FILE__) . '/survey-config.php';
  ************************************************/
 
 
-if ( !defined( 'SERVICE_ACCOUNT_NAME' ) || !defined( 'KEY_FILE_LOCATION' ) ) {
-	$response = array(
-		'error' => 'Ensure config.php is properly filled out'
-	);
-
-	header("HTTP/1.0 500 Internal Server Error");
-	exit( json_encode( $response ) );
-}
-
-$client = new Google_Client();
+$client->setAuthConfig(SERVICE_ACCOUNT);
 $client->setApplicationName( "W3F Survey" );
+$client->addScope('https://www.googleapis.com/auth/drive');
+
 $service = new Google_Service_Drive( $client );
 
 /************************************************
@@ -54,19 +47,13 @@ $service = new Google_Service_Drive( $client );
 if ( isset( $_SESSION['service_token'] ) ) {
 	$client->setAccessToken( $_SESSION['service_token'] );
 }
-$key = file_get_contents( KEY_FILE_LOCATION );
 
-$credentials = new Google_Auth_AssertionCredentials(
-	SERVICE_ACCOUNT_NAME,
-	array( 'https://www.googleapis.com/auth/drive' ),
-	$key
-);
-
-$client->setAssertionCredentials( $credentials );
-if( $client->getAuth()->isAccessTokenExpired() ) {
-	$client->getAuth()->refreshTokenWithAssertion( $credentials );
+if( $client->isAccessTokenExpired()) {
+    $client->refreshTokenWithAssertion();
 }
-$_SESSION['service_token'] = $client->getAccessToken();
+
+$access_token = $client->getAccessToken()['access_token'];
+
 
 /************************************************
   Routing
