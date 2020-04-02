@@ -1,9 +1,13 @@
-Web Index / Open Data Barometer Survey Tool Dev Branch
-==============
+Barometer Survey Tool 
+=====================
 
 This repository contains a custom application built to administer expert surveys, with a defined review process.
 
-It uses a Google Docs back-end to define the surveys and store data, and implements a workflow with three main roles:
+It was [originally developed](https://github.com/TheWebFoundation/barometer-survey-tool) to run the Web Foundation's Web Index and Open Data Barometer. This fork is being further developed for use with the Global Data Barometer and other projects.
+
+## Architecture
+
+The survey tool uses a Google Docs back-end to define the surveys and store data, and implements a workflow with three main roles:
 
 * Coordinator
 * Primary researcher
@@ -39,11 +43,13 @@ The Angular.js application is found in this repository, and should be deployed t
 The php proxy also takes care of storing uploaded files, using a Google Files API instance attached to a defined google account, and then sharing the files with the researcher/reviewer/coordinator as the survey is loaded when moving between states. 
 
 (2) Survey Definitions
-These are found in the Templates folder in Web Foundation Web Index Survey 2014 with two sheets: one defining the sections of the survey, and the other defining the questions in each section.
+
+These are found in the Templates with two sheets: one defining the sections of the survey, and the other defining the questions in each section.
 
 A template Answers sheet is also found in the Templates folder.
 
 (3) Back-end scripts
+
 These are attached to a Control Sheet spreadsheet from which the current state of surveys can be seen and reviewed.
 
 Triggers need to be configured to be run the scripts on updates to the spreadsheet. 
@@ -79,30 +85,33 @@ Sections are defined on the Sections sheet, and questions on the Question sheet.
 
 Survey descriptions can include Markdown. 
 
-Notes:
-
-* At present this will need to be imported/copied to an [old version Google Spreadsheet](https://support.google.com/docs/answer/3544847?hl=en) and should not be updated to the new sheets, as otherwise [certain cross-site issues occur](https://github.com/practicalparticipation/barometer-survey-tool/issues/2).  
-
 (3) Set the sharing settings so that anyone with the link can view this spreadsheet. 
 
 ### Set up the server side component
 
-(1) Checkout the code from https://github.com/practicalparticipation/barometer-survey-tool and point a domain / subdomain to this directory
+(1) Checkout the code and point a domain / subdomain to the htdocs directory
 
 (2) Go to the Google Developer Console at https://console.developers.google.com and
 
- - Set up a new application
- - Go to APIs & Auth
- - Enable the Drive API under APIs
- - Go to Credentials
- - Create a new ClientID for the Web Application with a valid javascript origin for the site where the service will be hosted
- - Create a new ClientID for a Service Account and generate a p12 key (save this somewhere securely)
- 
+ - Create a new project & make sure that project is selected
+ - Go to the [Drive API](https://console.developers.google.com/apis/library/drive.googleapis.com) and enable it
+ - Create [credentials for the project](https://console.developers.google.com/apis/credentials)
+
+You will need to:
+
+- Configure the OAuth Consent Screen (allowing for external users)
+
+- Create an OAuth client ID for a Web Application
+  - Application Type: Web Application
+
+- Create a service account
+  - Create a P12 key for the account and save this securely
+
 (2) Edit the js/w3f-survey.js file configuration:
 
 MASTER_KEY - should be the spreadsheet key of the Survey Questions spreadsheet
 CLIENT_ID - should be the Client ID given in the Google Developer Console, prepared at step 2
-SERVICE_ACCOUNT - should by the E-mail address given in the Google Developer Console, prepared at step 2.
+
 
 (3) Rename survey-config-sample.php to survey-config.php and edit it to provide:
 
