@@ -27,16 +27,6 @@ require_once dirname(__FILE__) . '/survey-config.php';
   account.
  ************************************************/
 
-
-if ( !defined( 'SERVICE_ACCOUNT_NAME' ) || !defined( 'KEY_FILE_LOCATION' ) ) {
-	$response = array(
-		'error' => 'Ensure config.php is properly filled out'
-	);
-
-	header("HTTP/1.0 500 Internal Server Error");
-	exit( json_encode( $response ) );
-}
-
 $client = new Google_Client();
 $client->setApplicationName( "W3F Survey" );
 
@@ -52,15 +42,9 @@ $client->setApplicationName( "W3F Survey" );
 if ( isset( $_SESSION['service_token'] ) ) {
 	$client->setAccessToken( $_SESSION['service_token'] );
 }
-$key = file_get_contents( KEY_FILE_LOCATION );
 
-$credentials = new Google_Auth_AssertionCredentials(
-	SERVICE_ACCOUNT_NAME,
-	array( 'https://spreadsheets.google.com/feeds' ),
-	$key
-);
 
-$client->setAssertionCredentials( $credentials );
+$client->setAuthConfig(SERVICE_ACCOUNT);
 
 // @TODO Check for invalid (revoked)token as well 
 if( $client->getAuth()->isAccessTokenExpired()) {
