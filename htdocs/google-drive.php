@@ -136,7 +136,7 @@ function uploadFile($service, $uploadedfile, $country = false) {
     $file->setName($title);    
     
     try {
-            $result = $service->files->insert(
+            $result = $service->files->create(
                     $file,
                     array(
                       'data' => file_get_contents($uploadedfile['tmp_name']),
