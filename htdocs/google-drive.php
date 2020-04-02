@@ -20,16 +20,17 @@
 
 session_start();
 
-require_once dirname(__FILE__) . '../vendor/autoload.php';
+require_once dirname(__FILE__) . '/../vendor/autoload.php';
 require_once dirname(__FILE__) . '/survey-config.php';
 
 /************************************************
   Make an API request authenticated with a service
   account.
  ************************************************/
-
+$client = new Google_Client();
 
 $client->setAuthConfig(SERVICE_ACCOUNT);
+
 $client->setApplicationName( "W3F Survey" );
 $client->addScope('https://www.googleapis.com/auth/drive');
 
@@ -105,7 +106,7 @@ function grantPermissions($service, $email, $file_id, $type, $role) {
     $newPermission = new Google_Service_Drive_Permission();
     $newPermission->setRole( $role );
     $newPermission->setType( $type );
-    $newPermission->setValue( $email );
+    $newPermission->setEmailAddress( $email );
 
     try {
             $perm = $service->permissions->insert( $file_id, $newPermission, array('sendNotificationEmails' => false) );
@@ -132,7 +133,7 @@ function uploadFile($service, $uploadedfile, $country = false) {
     
     $file = new Google_Service_Drive_DriveFile();
     $title = ($country) ? $country . ' - ' . $uploadedfile['name'] : $uploadedfile['name'];
-    $file->setTitle($title);    
+    $file->setName($title);    
     
     try {
             $result = $service->files->insert(
