@@ -45,12 +45,13 @@ if ( isset( $_SESSION['service_token'] ) ) {
 
 
 $client->setAuthConfig(SERVICE_ACCOUNT);
+$client->addScope('https://spreadsheets.google.com/feeds');
 
 // @TODO Check for invalid (revoked)token as well 
 if( $client->isAccessTokenExpired()) {
 	$client->refreshTokenWithAssertion();
 }
-$access_token = json_decode($client->getAccessToken())->access_token;
+$access_token = $client->getAccessToken()['access_token'];
 
 /************************************************
   Routing & sanitizing
