@@ -20,7 +20,7 @@
 
 session_start();
 
-require_once dirname(__FILE__) . '/vendor/autoload.php';
+require_once dirname(__FILE__) . '../vendor/autoload.php';
 require_once dirname(__FILE__) . '/survey-config.php';
 
 /************************************************
@@ -145,7 +145,7 @@ function uploadFile($service, $uploadedfile, $country = false) {
     
     $file = new Google_Service_Drive_DriveFile();
     $title = ($country) ? $country . ' - ' . $uploadedfile['name'] : $uploadedfile['name'];
-    $file->setTitle($title);
+    $file->setTitle($title);    
     
     try {
             $result = $service->files->insert(

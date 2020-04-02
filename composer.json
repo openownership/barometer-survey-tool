@@ -11,7 +11,4 @@
     "require": {
         "google/apiclient": "^2.0"
     },
-    "config": {
-        "vendor-dir": "htdocs/vendor"
-    }
 }
