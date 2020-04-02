@@ -109,7 +109,7 @@ function grantPermissions($service, $email, $file_id, $type, $role) {
     $newPermission->setEmailAddress( $email );
 
     try {
-            $perm = $service->permissions->create( $file_id, $newPermission, array('sendNotificationEmails' => false) );
+            $perm = $service->permissions->create( $file_id, $newPermission, array('sendNotificationEmail' => false) );
             exit( json_encode( $perm ) );
     } catch ( Exception $e ) {
             $response = array(
@@ -144,6 +144,7 @@ function uploadFile($service, $uploadedfile, $country = false) {
                       'uploadType' => 'multipart'
                     )
             );
+            $result = $service->files->get(fileId=$result->id);
             exit(json_encode($result));  
     } catch ( Exception $e ) {
             $response = array(
