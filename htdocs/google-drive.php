@@ -109,7 +109,7 @@ function grantPermissions($service, $email, $file_id, $type, $role) {
     $newPermission->setEmailAddress( $email );
 
     try {
-            $perm = $service->permissions->create( $file_id, $newPermission, array('sendNotificationEmail' => false) );
+            $perm = $service->permissions->create( $file_id, $newPermission, array('sendNotificationEmail' => false, 'supportsAllDrives' => true) );
             exit( json_encode( $perm ) );
     } catch ( Exception $e ) {
             $response = array(
@@ -130,7 +130,7 @@ function uploadFile($service, $uploadedfile, $country = false) {
             header("HTTP/1.0 403 Forbidden");
             exit (json_encode($response));
     }
-    
+
     $file = new Google_Service_Drive_DriveFile();
     $title = ($country) ? $country . ' - ' . $uploadedfile['name'] : $uploadedfile['name'];
     $file->setName($title);    
@@ -142,10 +142,11 @@ function uploadFile($service, $uploadedfile, $country = false) {
                     array(
                       'data' => file_get_contents($uploadedfile['tmp_name']),
                       'mimeType' => 'application/octet-stream',
-                      'uploadType' => 'multipart'
+                      'uploadType' => 'multipart',
+                      'supportsAllDrives' => true
                     )
             );
-            $result = $service->files->get($result->id, array('fields'=>'*'));
+            $result = $service->files->get($result->id, array('fields'=>'*','supportsAllDrives' => true));
             exit(json_encode($result));  
     } catch ( Exception $e ) {
             $response = array(
@@ -154,5 +155,6 @@ function uploadFile($service, $uploadedfile, $country = false) {
             header("HTTP/1.0 502 Bad Gateway");
             exit( json_encode( $response ) );
     }
+
       
 }
