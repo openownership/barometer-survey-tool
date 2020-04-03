@@ -20,8 +20,11 @@
 
 // Values for the service account
 // SERVICE_ACCOUNT_NAME should be the email address for the service account
-// KEY_FILE_LOCATION should be a relative path to the location of the .p12 key
-// for the service account
+// KEY_FILE_LOCATION should be a relative path to the location of the .p12 key (DEPRECATED)
+// SERVICE_ACCOUNT should be a json service account file
+// FILES_FOLDER should by the Google Drive key of the default folder to save files into
+
 define('SERVICE_ACCOUNT_NAME', 'X@X.iam.gserviceaccount.com');
 define('KEY_FILE_LOCATION', '../xxxxxxx.p12');
 define('SERVICE_ACCOUNT','../xxxxx.json')
+define('FILES_FOLDER','1hZFdzyb6dcTJeETnTHqjW4taRr-G-CQI')

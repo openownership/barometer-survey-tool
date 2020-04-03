@@ -1086,6 +1086,7 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
 					if(!file) {
 						return;
 					}
+										$scope.uploadState = "Uploading...";
 
                                         var fd = new FormData();
                                         fd.append('file', file);
