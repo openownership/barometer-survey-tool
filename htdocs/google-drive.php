@@ -83,7 +83,8 @@ elseif ( 'upload' == $_GET['action'] ) {
                 uploadFile(
                     $service,
                     $file,
-                    $_GET['country']
+                    $_GET['country'],
+                    $_GET['sheet']
                 );
                 $found = true;
             }
@@ -121,7 +122,7 @@ function grantPermissions($service, $email, $file_id, $type, $role) {
     
 }
 
-function uploadFile($service, $uploadedfile, $country = false) {
+function uploadFile($service, $uploadedfile, $country = false, $sheet = false) {
 
     if (!is_uploaded_file($uploadedfile['tmp_name'])) {
             $response = array(
@@ -133,8 +134,21 @@ function uploadFile($service, $uploadedfile, $country = false) {
 
     $file = new Google_Service_Drive_DriveFile();
     $title = ($country) ? $country . ' - ' . $uploadedfile['name'] : $uploadedfile['name'];
-    $file->setName($title);    
-    $file->setParents(array('1hZFdzyb6dcTJeETnTHqjW4taRr-G-CQI'));
+    $file->setName($title);   
+
+    if($sheet) {
+        try {
+            $sheet_parents = $service->files->get($sheet, array('fields'=>'parents','supportsAllDrives' => true));
+            $file->setParents($sheet_parents['parents']);
+        } catch ( Exception $e ) {
+
+        } 
+    } else {
+        if(DEFAULT_FOLDER) {
+            $file->setParents(array(DEFAULT_FOLDER));
+        }
+    }
+    
     
     try {
             $result = $service->files->create(

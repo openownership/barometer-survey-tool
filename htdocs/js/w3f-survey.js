@@ -1096,7 +1096,8 @@ angular.module('W3FWIS', [ 'GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader
                                                 params: {
                                                     action: 'upload',
                                                     filename: file.name,
-                                                    country: $rootScope.country
+                                                    country: $rootScope.country,
+                                                    sheet: $rootScope.answerSheets.Control.key
                                                 },
                                                 headers: {
                                                     'Content-Type': undefined
