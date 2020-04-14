@@ -26,5 +26,5 @@
 
 define('SERVICE_ACCOUNT_NAME', 'X@X.iam.gserviceaccount.com');
 define('KEY_FILE_LOCATION', '../xxxxxxx.p12');
-define('SERVICE_ACCOUNT','../xxxxx.json')
-define('FILES_FOLDER','1hZFdzyb6dcTJeETnTHqjW4taRr-G-CQI')
+define('SERVICE_ACCOUNT','../xxxxx.json');
+define('FILES_FOLDER','1hZFdzyb6dcTJeETnTHqjW4taRr-G-CQI');

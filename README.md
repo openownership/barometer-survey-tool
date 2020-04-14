@@ -36,11 +36,9 @@ The survey tool consists of four main components:
 
 (1) Front End Application
 
-An Angular.js single page application, supported by a php web-proxy. 
+An Angular.js single page application, supported by a php web-proxy for accessing the Google Sheets backend. 
 
-The Angular.js application is found in this repository, and should be deployed to the root of a server.
-
-The php proxy also takes care of storing uploaded files, using a Google Files API instance attached to a defined google account, and then sharing the files with the researcher/reviewer/coordinator as the survey is loaded when moving between states. 
+PHP scripts also take care of storing uploaded files, using a Google Files API instance attached to a defined google account, and then sharing the files with the researcher/reviewer/coordinator as the survey is loaded when moving between states. 
 
 (2) Survey Definitions
 
@@ -105,9 +103,9 @@ You will need to:
   - Application Type: Web Application
 
 - Create a service account
-  - Create a P12 key for the account and save this securely
+  - Create a json key for the account and save this securely in the root folder as service_account_key.json
 
-(2) Edit the js/w3f-survey.js file configuration:
+(2) Edit the config.js file configuration:
 
 MASTER_KEY - should be the spreadsheet key of the Survey Questions spreadsheet
 CLIENT_ID - should be the Client ID given in the Google Developer Console, prepared at step 2
@@ -129,6 +127,10 @@ http://[yourmachine]/proxy/proxy.php?ping
 http://[yourmachine]/proxy/proxy.php?http://example.org
 ```
 See the [instructions] (https://github.com/Esri/resource-proxy/tree/master/PHP) for more advanced settings and troubleshooting.
+
+(4) Install composer dependencies
+
+Run `composer update` in the root folder. 
 
 ### Set up the Control Sheet
 
