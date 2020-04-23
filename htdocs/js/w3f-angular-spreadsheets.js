@@ -179,7 +179,7 @@ angular.module("GoogleSpreadsheets", []).factory("spreadsheets", [
     function updateRow(url, values) {
       var deferred = defer()
       var parseResponse = function (data) {
-        var xml = new DOMParser().parseFromString(response.data, "text/xml")
+        var xml = new DOMParser().parseFromString(data, "text/xml")
         var entries = xml.getElementsByTagName("entry")
 
         return mungeEntry(entries[0])
