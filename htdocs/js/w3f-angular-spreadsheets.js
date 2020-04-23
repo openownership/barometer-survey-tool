@@ -16,245 +16,266 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-angular.module('GoogleSpreadsheets', [])
-	.factory('spreadsheets', [ '$http', '$q', function($http, $q) {
-		var service = this;
+angular.module("GoogleSpreadsheets", []).factory("spreadsheets", [
+  "$http",
+  "$q",
+  function ($http, $q) {
+    var service = this
 
-		var getText = function(entry, field) {
-			var elements = entry.getElementsByTagName(field);
-			
-			if(elements.length > 0) {
-				return elements[0].textContent;
-			}
-			else {
-				return null;
-			}
-		};
+    var getText = function (entry, field) {
+      var elements = entry.getElementsByTagName(field)
 
-		// Introduce an "abort" method on promise objects which will
-		// kill the current request
-		var defer = function() {
-			var deferred = $q.defer();
+      if (elements.length > 0) {
+        return elements[0].textContent
+      } else {
+        return null
+      }
+    }
 
-			deferred.promise.abort = function() {
-				deferred.reject("cancelled");
-			}
+    // Introduce an "abort" method on promise objects which will
+    // kill the current request
+    var defer = function () {
+      var deferred = $q.defer()
 
-			return deferred;
-		}
+      deferred.promise.abort = function () {
+        deferred.reject("cancelled")
+      }
 
-		// Process a single XML entry for a list feed and return a "row"
-		var mungeEntry = function(entry) {
-			var id = entry.getElementsByTagName('id');
-			var cells = entry.getElementsByTagNameNS('http://schemas.google.com/spreadsheets/2006/extended', '*');
-			var key;
-			var row = {};
+      return deferred
+    }
 
-			angular.forEach(cells, function(cell) {
-				var col = cell.tagName.match(/^gsx:(.+)$/)[1];
+    // Process a single XML entry for a list feed and return a "row"
+    var mungeEntry = function (entry) {
+      var id = entry.getElementsByTagName("id")
+      var cells = entry.getElementsByTagNameNS(
+        "http://schemas.google.com/spreadsheets/2006/extended",
+        "*"
+      )
+      var key
+      var row = {}
 
-				row[col] = cell.textContent;
-			});
+      angular.forEach(cells, function (cell) {
+        var col = cell.tagName.match(/^gsx:(.+)$/)[1]
 
-			var links = entry.getElementsByTagName('link');
+        row[col] = cell.textContent
+      })
 
-			// Prefix meta data with :, save links and row id
-			row[':links'] = {};
+      var links = entry.getElementsByTagName("link")
 
-			angular.forEach(links, function(link) {
-				row[':links'][link.getAttribute('rel')] = link.getAttribute('href');
-			});
+      // Prefix meta data with :, save links and row id
+      row[":links"] = {}
 
-			row[':id'] = id[0].textContent.match(/\/([^\/]+)$/)[1];
+      angular.forEach(links, function (link) {
+        row[":links"][link.getAttribute("rel")] = link.getAttribute("href")
+      })
 
-			return row;
-		};
+      row[":id"] = id[0].textContent.match(/\/([^\/]+)$/)[1]
 
-		function getSheets(key) {
-			var url = 'https://spreadsheets.google.com/feeds/worksheets/' + key + '/private/full';
-                        
-			var deferred = defer();
+      return row
+    }
 
-			$http({ 
-				method: 'GET',
-                                url: '/google-spreadsheets.php?action=retreive&url=' + url,
-				timeout: deferred,
-			})
-				.success(function(data, status, headers, config) {
-					var xml = new DOMParser().parseFromString(data, "text/xml")
-					var sheets = {};
+    function getSheets(key) {
+      var url =
+        "https://spreadsheets.google.com/feeds/worksheets/" +
+        key +
+        "/private/full"
 
-					angular.forEach(xml.getElementsByTagName('entry'), function(entry) {
-						var title = getText(entry, 'title');
-						var id = getText(entry, 'id');
-						
-						if(typeof id == 'string') {
-							id = id.match(/([^\/]+)$/)[1];
-						}
+      var deferred = defer()
 
-						var sheet = {
-							key: key,
-							id: id,
-							rowCount: parseInt(getText(entry, 'rowCount')),
-							colCount: parseInt(getText(entry, 'colCount'))
-						};
-						
-						var links = entry.getElementsByTagName('link');
+      $http({
+        method: "GET",
+        url: "/google-spreadsheets.php?action=retreive&url=" + url,
+        timeout: deferred,
+      })
+        .success(function (data, status, headers, config) {
+          var xml = new DOMParser().parseFromString(data, "text/xml")
+          var sheets = {}
 
-						// Prefix meta data with :, save links and row id
-						sheet[':links'] = {};
+          angular.forEach(xml.getElementsByTagName("entry"), function (entry) {
+            var title = getText(entry, "title")
+            var id = getText(entry, "id")
 
-						angular.forEach(links, function(link) {
-							sheet[':links'][link.getAttribute('rel')] = link.getAttribute('href');
-						});
+            if (typeof id == "string") {
+              id = id.match(/([^\/]+)$/)[1]
+            }
 
-						sheets[title] = sheet;
-					});
+            var sheet = {
+              key: key,
+              id: id,
+              rowCount: parseInt(getText(entry, "rowCount")),
+              colCount: parseInt(getText(entry, "colCount")),
+            }
 
-					deferred.resolve(sheets);
-				})
-				.error(function(data, status, headers, config) {
-					deferred.reject("Unable to access answer data.");
-				});
+            var links = entry.getElementsByTagName("link")
 
-			return deferred.promise;
-		};
+            // Prefix meta data with :, save links and row id
+            sheet[":links"] = {}
 
-		function getRows(key, sheet, useKey) {
-			var url = 'https://spreadsheets.google.com/feeds/list/' + key + '/' + sheet.id + '/private/full';
+            angular.forEach(links, function (link) {
+              sheet[":links"][link.getAttribute("rel")] = link.getAttribute(
+                "href"
+              )
+            })
 
-			var deferred = defer();
+            sheets[title] = sheet
+          })
 
-			$http({
-				method: 'GET',
-				url: '/google-spreadsheets.php?action=retreive&url=' + url,
-				timeout: deferred
-			})
-				.success(function(data, status, headers, config) {
-					var xml = new DOMParser().parseFromString(data, "text/xml")
-					var entries = xml.getElementsByTagName('entry');
-					var rows = useKey ? {} : [];
+          deferred.resolve(sheets)
+        })
+        .error(function (data, status, headers, config) {
+          deferred.reject("Unable to access answer data.")
+        })
 
-					angular.forEach(entries, function(entry) {
-						var row = mungeEntry(entry);
+      return deferred.promise
+    }
 
-						if(useKey) {
-							if(key) {
-								rows[row[useKey]] = row;
-							}
-							else {
-								if(!rows['']) {
-									rows[''] = [];
-								}
+    function getRows(key, sheet, useKey) {
+      var url =
+        "https://spreadsheets.google.com/feeds/list/" +
+        key +
+        "/" +
+        sheet.id +
+        "/private/full"
 
-								rows[''].push(row);
-							}
-						}
-						else {
-							rows.push(row);
-						}
-					});
+      var deferred = defer()
 
-					deferred.resolve(rows);
-				})
-				.error(function(data, status, headers, config) {
-					deferred.reject(data);
-				});
+      $http({
+        method: "GET",
+        url: "/google-spreadsheets.php?action=retreive&url=" + url,
+        timeout: deferred,
+      })
+        .success(function (data, status, headers, config) {
+          var xml = new DOMParser().parseFromString(data, "text/xml")
+          var entries = xml.getElementsByTagName("entry")
+          var rows = useKey ? {} : []
 
-			return deferred.promise;
-		};
+          angular.forEach(entries, function (entry) {
+            var row = mungeEntry(entry)
 
-		function updateRow(url, values) {
-			var deferred = defer();
-			var parseResponse = function(data) {
-				var xml = new DOMParser().parseFromString(data, "text/xml");
-				var entries = xml.getElementsByTagName('entry');
+            if (useKey) {
+              if (key) {
+                rows[row[useKey]] = row
+              } else {
+                if (!rows[""]) {
+                  rows[""] = []
+                }
 
-				return mungeEntry(entries[0]);
-			}
+                rows[""].push(row)
+              }
+            } else {
+              rows.push(row)
+            }
+          })
 
-			$http({
-				method: 'POST',
-				url: '/google-spreadsheets.php?action=submit&url=' + url + '&method=PUT',
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded'
-				},
-				timeout: deferred,
-				data: $.param(values)
-			})
-				.success(function(data, status, headers, config) {
-					deferred.resolve(parseResponse(data));
-				})
-				.error(function(data, status, headers, config) {
-					// Don't necessarily call 409 status an error: maybe nothing was going to change
-					// anyway
-					if(status == 409) {
-						deferred.resolve(parseResponse(data));
-					}
-					
-					deferred.reject(data);
-				});
-			
-			return deferred.promise;
-		};
+          deferred.resolve(rows)
+        })
+        .error(function (data, status, headers, config) {
+          deferred.reject(data)
+        })
 
-		function insertRow(sheet, values) {
-			var url = 'https://spreadsheets.google.com/feeds/list/' + sheet.key + '/' + sheet.id + '/private/full';
-			var deferred = defer();
+      return deferred.promise
+    }
 
-			$http({
-				method: 'POST',
-				url: '/google-spreadsheets.php?action=submit&url=' + url + '&method=POST',
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded'
-				},
-				timeout: deferred,
-				data: $.param(values)
-			})
-				.success(function(data, status, headers, config) {
-					var xml = new DOMParser().parseFromString(data, "text/xml")
-					var entries = xml.getElementsByTagName('entry');
+    function updateRow(url, values) {
+      var deferred = defer()
+      var parseResponse = function (data) {
+        var xml = new DOMParser().parseFromString(data, "text/xml")
+        var entries = xml.getElementsByTagName("entry")
 
-					deferred.resolve(mungeEntry(entries[0]));
-				})
-				.error(function(data, status, headers, config) {
-					deferred.reject(data);
-				});
-			
-			return deferred.promise;
-		};
+        return mungeEntry(entries[0])
+      }
 
-		function deleteRow(url, id) {
-			var deferred = defer();
+      $http({
+        method: "POST",
+        url:
+          "/google-spreadsheets.php?action=submit&url=" + url + "&method=PUT",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        timeout: deferred,
+        data: $.param(values),
+      })
+        .success(function (data, status, headers, config) {
+          deferred.resolve(parseResponse(data))
+        })
+        .error(function (data, status, headers, config) {
+          // Don't necessarily call 409 status an error: maybe nothing was going to change
+          // anyway
+          if (status == 409) {
+            deferred.resolve(parseResponse(data))
+          }
 
-			$http({
-				method: 'GET',
-				url: '/google-spreadsheets.php?action=submit&url=' + url + '&method=DELETE',
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded'
-				},
-				timeout: deferred,
-			})
-				.success(function(data, status, headers, config) {
-					var xml = new DOMParser().parseFromString(data, "text/xml")
-					var entries = xml.getElementsByTagName('entry');
+          deferred.reject(data)
+        })
 
-					deferred.resolve({ id: id });
-				})
-				.error(function(data, status, headers, config) {
-					deferred.reject(data);
-				});
-			
-			return deferred.promise;
-		};
+      return deferred.promise
+    }
 
-		return {
-			getSheets: getSheets,
-			getRows: getRows,
-			updateRow: updateRow,
-			insertRow: insertRow,
-			deleteRow: deleteRow
-		};
-	} ]);
+    function insertRow(sheet, values) {
+      var url =
+        "https://spreadsheets.google.com/feeds/list/" +
+        sheet.key +
+        "/" +
+        sheet.id +
+        "/private/full"
+      var deferred = defer()
 
+      $http({
+        method: "POST",
+        url:
+          "/google-spreadsheets.php?action=submit&url=" + url + "&method=POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        timeout: deferred,
+        data: $.param(values),
+      })
+        .success(function (data, status, headers, config) {
+          var xml = new DOMParser().parseFromString(data, "text/xml")
+          var entries = xml.getElementsByTagName("entry")
 
+          deferred.resolve(mungeEntry(entries[0]))
+        })
+        .error(function (data, status, headers, config) {
+          deferred.reject(data)
+        })
+
+      return deferred.promise
+    }
+
+    function deleteRow(url, id) {
+      var deferred = defer()
+
+      $http({
+        method: "GET",
+        url:
+          "/google-spreadsheets.php?action=submit&url=" +
+          url +
+          "&method=DELETE",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        timeout: deferred,
+      })
+        .success(function (data, status, headers, config) {
+          var xml = new DOMParser().parseFromString(data, "text/xml")
+          var entries = xml.getElementsByTagName("entry")
+
+          deferred.resolve({ id: id })
+        })
+        .error(function (data, status, headers, config) {
+          deferred.reject(data)
+        })
+
+      return deferred.promise
+    }
+
+    return {
+      getSheets: getSheets,
+      getRows: getRows,
+      updateRow: updateRow,
+      insertRow: insertRow,
+      deleteRow: deleteRow,
+    }
+  },
+])
