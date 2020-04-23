@@ -87,8 +87,8 @@ angular.module("GoogleSpreadsheets", []).factory("spreadsheets", [
         url: "/google-spreadsheets.php?action=retreive&url=" + url,
         timeout: deferred,
       })
-        .success(function (data, status, headers, config) {
-          var xml = new DOMParser().parseFromString(data, "text/xml")
+        .then(function (response) {
+          var xml = new DOMParser().parseFromString(response.data, "text/xml")
           var sheets = {}
 
           angular.forEach(xml.getElementsByTagName("entry"), function (entry) {
@@ -122,7 +122,7 @@ angular.module("GoogleSpreadsheets", []).factory("spreadsheets", [
 
           deferred.resolve(sheets)
         })
-        .error(function (data, status, headers, config) {
+        .then(function (error) {
           deferred.reject("Unable to access answer data.")
         })
 
@@ -144,8 +144,8 @@ angular.module("GoogleSpreadsheets", []).factory("spreadsheets", [
         url: "/google-spreadsheets.php?action=retreive&url=" + url,
         timeout: deferred,
       })
-        .success(function (data, status, headers, config) {
-          var xml = new DOMParser().parseFromString(data, "text/xml")
+        .then(function (response) {
+          var xml = new DOMParser().parseFromString(response.data, "text/xml")
           var entries = xml.getElementsByTagName("entry")
           var rows = useKey ? {} : []
 
@@ -169,8 +169,8 @@ angular.module("GoogleSpreadsheets", []).factory("spreadsheets", [
 
           deferred.resolve(rows)
         })
-        .error(function (data, status, headers, config) {
-          deferred.reject(data)
+        .then(function (error) {
+          deferred.reject(error)
         })
 
       return deferred.promise
@@ -179,7 +179,7 @@ angular.module("GoogleSpreadsheets", []).factory("spreadsheets", [
     function updateRow(url, values) {
       var deferred = defer()
       var parseResponse = function (data) {
-        var xml = new DOMParser().parseFromString(data, "text/xml")
+        var xml = new DOMParser().parseFromString(response.data, "text/xml")
         var entries = xml.getElementsByTagName("entry")
 
         return mungeEntry(entries[0])
@@ -195,17 +195,17 @@ angular.module("GoogleSpreadsheets", []).factory("spreadsheets", [
         timeout: deferred,
         data: $.param(values),
       })
-        .success(function (data, status, headers, config) {
-          deferred.resolve(parseResponse(data))
+        .then(function (response) {
+          deferred.resolve(parseResponse(response.data))
         })
-        .error(function (data, status, headers, config) {
+        .then(function (error) {
           // Don't necessarily call 409 status an error: maybe nothing was going to change
           // anyway
           if (status == 409) {
-            deferred.resolve(parseResponse(data))
+            deferred.resolve(parseResponse(error))
           }
 
-          deferred.reject(data)
+          deferred.reject(error)
         })
 
       return deferred.promise
@@ -230,14 +230,14 @@ angular.module("GoogleSpreadsheets", []).factory("spreadsheets", [
         timeout: deferred,
         data: $.param(values),
       })
-        .success(function (data, status, headers, config) {
-          var xml = new DOMParser().parseFromString(data, "text/xml")
+        .then(function (response) {
+          var xml = new DOMParser().parseFromString(response.data, "text/xml")
           var entries = xml.getElementsByTagName("entry")
 
           deferred.resolve(mungeEntry(entries[0]))
         })
-        .error(function (data, status, headers, config) {
-          deferred.reject(data)
+        .then(function (error) {
+          deferred.reject(error)
         })
 
       return deferred.promise
@@ -257,14 +257,14 @@ angular.module("GoogleSpreadsheets", []).factory("spreadsheets", [
         },
         timeout: deferred,
       })
-        .success(function (data, status, headers, config) {
-          var xml = new DOMParser().parseFromString(data, "text/xml")
+        .then(function (response) {
+          var xml = new DOMParser().parseFromString(response.data, "text/xml")
           var entries = xml.getElementsByTagName("entry")
 
           deferred.resolve({ id: id })
         })
-        .error(function (data, status, headers, config) {
-          deferred.reject(data)
+        .then(function (error) {
+          deferred.reject(error)
         })
 
       return deferred.promise
