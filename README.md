@@ -175,28 +175,38 @@ When adding new lines, be sure to copy the validation criteria from the rows abo
 
 Each row represents one survey.
 
-* Column B contains the name of an individual survey. In the Web Index case, this is one survey for each Country, but it could be city, organisation and so-on depending on application of the tool.
-* Column C contains a drop-down list used to trigger updates to the row. Whilst an hourly trigger should refresh data, this can be used to force updates.
-* Column E contains the status of the survey. Changing this from '0. Recruitment' to '1. Initial research' will create a survey sheet if one does not already exist.
-* Column F and G contain links to the underlying data, and front-end survey for a row
-* Column H and J are used for notes
-* Column J is automatically set to the deadline for the current stage of the survey research to be complete (times allowed for each stage are set in column E of the 'StatusList' tab.
-* Column K - P are used for Coorindator, Researcher and Reviewer deatils. The e-mail columns can contain a comma separated list of e-mail addresses to be notified of status changes, but the first in each list **must** be a google account, as this is what will be used to authenticate the user.
-* Column Q is where the spreadsheet key of the answer sheet will be recorded by the scripts. This must not be changed manually.
-* Columns R - T can be used for notes
-* Columns U onwards will be automatically set whenever the row is reset with a count of the number of answered questions in each section of the survey. The headings can be changed to reflect the sections in your survey. This provides an at-a-glance view of progress in completing each survey.
+* `Name` contains the name of an individual survey. In the Web Index case, this is one survey for each Country, but it could be city, organisation and so-on depending on application of the tool.
+* `Synchronize` contains a drop-down list used to trigger updates to the row. Whilst an hourly trigger should refresh data, this can be used to force updates.
+* `Status` contains the status of the survey. Changing this from '0. Recruitment' to '1. Initial research' will create a survey sheet if one does not already exist.
+* `View Answer Sheet` and `View Survey` contain links to the underlying data, and front-end survey for a row
+* `Deadline` is automatically set to the deadline for the current stage of the survey research to be complete (times allowed for each stage are set in column E of the 'StatusList' tab.
+* `Coorindator`, `Researcher` and `Reviewer` details are split into name and e-mails. The e-mail columns can contain a comma separated list of e-mail addresses to be notified of status changes, but the first in each list **must** be a google account, as this is what will be used to authenticate the user.
+* `AnswerSheet` is where the spreadsheet key of the answer sheet will be recorded by the scripts. This must not be changed manually.
+* Columns from `CompletionMap` onwards will be automatically set with a count of the number of answered questions in each section of the survey. The headings can be changed to reflect the sections in your survey. This provides an at-a-glance view of progress in completing each survey.
  
 #### General management
 
-To launch a survey, add a row with a value in column B, and then Coordinator, Researcher and Reviewer details
+To launch a survey, add a row with a value in the Name column, and then Coordinator, Researcher and Reviewer details
 
-Change Column E (Current Status) from 0. Recruitment to 1. Recruitment.
+Change Current Status column from 0. Recruitment to 1. Recruitment.
 
 If everything is working, this should trigger a script to generate a new answer spreadsheet from the template, to share this with the researcher, and to e-mail them details of how to access it. 
 
 They can then answer questions, and submit the survey to the next stage of the process. The hourly update triggers should then notify the coordinator when this has happened, and allow them to check and move the survey through subsequent processes.
 
-The control sheet can be used to move the survey through processes at any time, and to force a refresh of the status using the drop-down in Column C. 
+The control sheet can be used to move the survey through processes at any time, and to force a refresh of the status using the drop-down in the 'Synchronise' column. 
+
+#### Survey states
+
+A survey may have a list of states it moves through. These are defined in the 'Status List' sheet, and map to a number of internally defined states:
+
+* recruitment 
+* assigned
+* spotcheck
+* clarification
+* review
+* validation
+* complete
 
 ## Aggregating data
 
