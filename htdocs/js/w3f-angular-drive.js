@@ -17,63 +17,63 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 angular.module('GoogleDrive', [])
-	.factory('gdrive', [ '$http', '$q', function($http, $q) {
-		var service = this;
+  .factory('gdrive', ['$http', '$q', function ($http, $q) {
+    var service = this;
 
-		// Introduce an "abort" method on promise objects which will
-		// kill the current request
-		var defer = function() {
-			var deferred = $q.defer();
+    // Introduce an "abort" method on promise objects which will
+    // kill the current request
+    var defer = function () {
+      var deferred = $q.defer();
 
-			deferred.promise.abort = function() {
-				deferred.reject("cancelled");
-			}
+      deferred.promise.abort = function () {
+        deferred.reject("cancelled");
+      }
 
-			return deferred;
-		}
+      return deferred;
+    }
 
-		function getPermissionIdByEmail(email) {
-			var deferred = defer();
+    function getPermissionIdByEmail(email) {
+      var deferred = defer();
 
-			var request = gapi.client.drive.permissions.getIdForEmail({
-				'email': email,
-			});
+      var request = gapi.client.drive.permissions.getIdForEmail({
+        'email': email,
+      });
 
-			request.execute(function(resp) {
-				deferred.resolve(resp);
-			});
+      request.execute(function (resp) {
+        deferred.resolve(resp);
+      });
 
-			return deferred.promise;
-		}
+      return deferred.promise;
+    }
 
-		function insertPermission(fileId, type, value, role) {
-			var deferred = defer();
+    function insertPermission(fileId, type, value, role) {
+      var deferred = defer();
 
-			if( !(fileId || type || value || role) ) {
-				deferred.reject('missing parameter(s)');
-			}
+      if (!(fileId || type || value || role)) {
+        deferred.reject('missing parameter(s)');
+      }
 
-			var resource = {
-				'type': type,
-				'value': value,
-				'role': role
-			}
+      var resource = {
+        'type': type,
+        'value': value,
+        'role': role
+      }
 
-			var request = gapi.client.drive.permissions.insert({
-				'fileId': fileId,
-				'sendNotificationEmails': false,
-				'resource': resource
-			});
+      var request = gapi.client.drive.permissions.insert({
+        'fileId': fileId,
+        'sendNotificationEmails': false,
+        'resource': resource
+      });
 
-			request.execute(function(resp) {
-				deferred.resolve(resp);
-			});
+      request.execute(function (resp) {
+        deferred.resolve(resp);
+      });
 
-			return deferred.promise;
-		}
+      return deferred.promise;
+    }
 
-		return {
-			getPermissionIdByEmail: getPermissionIdByEmail,
-			insertPermission: insertPermission
-		};
-	} ]);
+    return {
+      getPermissionIdByEmail: getPermissionIdByEmail,
+      insertPermission: insertPermission
+    };
+  }]);
