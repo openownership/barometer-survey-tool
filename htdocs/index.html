@@ -17,8 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<html ng-app="W3FWIS">
+<html ng-app="W3FWIS"  lang="en">
 	<head>
+		<meta charset="utf-8"/>
 		<base href="/" />
 		<title>{{ config.title }} {{ country ? ' - ' + country : ''}}</title>
        
@@ -81,6 +82,6 @@
 			<div id="survey" ng-if="!error" ng-view></div>
 		</div>
 
-                <script src="https://apis.google.com/js/client:platform.js?onload=init" async defer></script>
+                <script src="//apis.google.com/js/client:platform.js?onload=init" async defer></script>
 	</body>
 </html>
