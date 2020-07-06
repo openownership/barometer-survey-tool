@@ -251,7 +251,7 @@ angular.module('W3FSurveyLoader', ['GoogleSpreadsheets'])
         gs.getRows(answerKey, $rootScope.answerSheets.Answers).then(function (answers) {
           angular.forEach(answers, function (answer) {
             if (!$rootScope.questions[answer.questionid]) {
-              console.log("Answer with qid=" + answer.questionid + " does not correspond to any survey question");
+              //console.log("Answer with qid=" + answer.questionid + " does not correspond to any survey question");
               return;
             }
 

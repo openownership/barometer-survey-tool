@@ -112,6 +112,7 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
 
     // Uploads
     $rootScope.uploads = []
+    $rootScope.queuedUploads = []
 
     // (Unresolved) note counts by section ID
     $rootScope.noteCount = {};
@@ -346,6 +347,7 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
       queue = {
         responses: {},
         notes: {},
+        uploads: []
       };
     }
 
@@ -385,6 +387,21 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
         _.each(queue.notes, function (note, qid) {
           _.extend($rootScope.notes[qid], note);
         });
+
+        // Combine queued uploads
+        _.each(queue.uploads, function (upload) {
+          _.union($rootScope.queuedUploads, upload);
+        });
+
+        // Watch uploads
+        var syncUploads = function (newUploads, oldUploads) {
+          if (oldUploads === newUploads) {
+            return;
+          }
+          queue.uploads = newUploads
+        }
+
+        $rootScope.$watchCollection("queuedUploads", syncUploads);
 
         // Only now that the answer sheet has been loaded
         // do we watch for changes to the responses that might
@@ -443,7 +460,8 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
         // when newer changes have occured
         var processQueue = {
           responses: {},
-          notes: {}
+          notes: {},
+          uploads: []
         };
 
         // Write data to the Answer sheet. If this is called with a write in progress,
@@ -451,8 +469,8 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
         var write = function () {
           var size = 0;
 
-          // Process a queue for the two sections
-          _.each(['responses', 'notes'], function (section) {
+          // Process a queue for the three sections
+          _.each(['responses', 'notes', 'uploads'], function (section) {
             // Don't save question responses made by non-researchers
             if (section == 'responses' && $rootScope.commentOnly) {
               return;
@@ -472,7 +490,27 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
                 return;
               }
 
-              if (section == 'responses') {
+              if (section == 'uploads') {
+                _.each(queue[section], function (upload, iterator) {
+                  if (upload && !upload.uploaded) {
+                    var newUpload = _.extend({}, {
+                      title: upload.name,
+                      thumbnail: upload.thumbnailLink,
+                      url: upload.webViewLink,
+                      id: upload.id
+                    })
+                    var promise = gs.insertRow($rootScope.answerSheets.Resources, newUpload);
+                    promise.then(function (row) {
+                      row.uploaded = true
+                      $rootScope.uploads.push(row)
+                    });
+                    pq.push(promise);
+                    upload.uploaded = true
+
+                  }
+                });
+
+              } else if (section == 'responses') {
                 // Build the record
                 var record = $.extend({}, {
                   response: values.response,
@@ -665,7 +703,7 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
           }
         }
 
-        // Try to save every three seconds.
+        // Try to save every ten seconds.
         $interval(function () {
           // Don't bother if:
           if ($rootScope.status.locked || // Locked
@@ -1066,15 +1104,28 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
             $scope.placeholder = $scope.$eval(attrs.placeholder);
           }
         });
-        $scope.onChangeUploadSelect = function() {
-          $scope.model =  _.clone($scope.uploads.model);
-          $scope.model.disabled = true;
-          $scope.model.locked = true;
+        $scope.onChangeUploadSelect = function () {
+          if ($scope.model) {
+            $scope.model = _.clone($scope.uploads.model);
+            $scope.model.disabled = true;
+            $scope.model.locked = true;
+          }
+
         }
         $scope.uploads = {
           availableOptions: $rootScope.uploads,
           model: { id: 'choose', title: 'Please choose a file' }
         };
+
+
+
+        $rootScope.$watchCollection('uploads', function () {
+          $scope.uploads = {
+            availableOptions: $rootScope.uploads,
+            model: { id: 'choose', title: 'Please choose a file' }
+          };
+        })
+
         if ($scope.model.url) {
           $scope.model.uploaded = true;
         }
@@ -1150,7 +1201,7 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
               });
 
               $q.all([userPermPromise, coordinatorPermPromise]).then(function () {
-
+                $rootScope.queuedUploads.push(results.data);
               }, function () {
                 $scope.uploadState = "Failed setting upload permissions! Try again.";
                 $scope.model.locked = false;

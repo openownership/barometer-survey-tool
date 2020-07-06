@@ -1,7 +1,7 @@
 <div class="uploadable-url">
 
 	<div ng-hide="disabled || model.locked">
-		<form name="select-uploads">
+		<form name="select-uploads" ng-if="uploads.availableOptions.length > 0">
 			<label for="repeatSelect">Select existing: </label>
 			<select name="upload-select" id="upload-select" ng-change="onChangeUploadSelect()"
 				ng-options="option.title for option in uploads.availableOptions track by option.url"
