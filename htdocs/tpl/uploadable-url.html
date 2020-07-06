@@ -1,22 +1,32 @@
 <div class="uploadable-url">
+
 	<div ng-hide="disabled || model.locked">
+		<form name="select-uploads">
+			<label for="repeatSelect">Select existing: </label>
+			<select name="upload-select" id="upload-select" ng-change="onChangeUploadSelect()"
+				ng-options="option.title for option in uploads.availableOptions track by option.url"
+				ng-model="uploads.model"></select>
+		</form>
 		<input type="text" ng-model="model.title" ng-show="model.uploaded" placeholder="{{ placeholder }}" />
 
 		<div class="uploadable-url-url">
-			<input type="text" ng-model="model.url" ng-disabled="disabled || model.locked" placeholder="File location" ng-hide="model.locked || !model.uploaded" />
+			<input type="text" ng-model="model.url" ng-disabled="disabled || model.locked" placeholder="File location"
+				ng-hide="model.locked || !model.uploaded" />
 
 			<div class="uploadable-url-upload" ng-if="!model.locked && !disabled">
 				<label class="button">
 					{{ uploadState || "Upload..." }}
-					<input type="file" onchange="angular.element(this).scope().upload(this)" ng-disabled="model.uploading" />
+					<input type="file" onchange="angular.element(this).scope().upload(this)"
+						ng-disabled="model.uploading" />
 				</label>
 			</div>
 		</div>
 	</div>
 	<div class="uploadable-url-preview-url" ng-if="model.locked">
-		<input type="text" ng-model="model.title" ng-show="model.uploaded && !(disabled)" placeholder="{{ placeholder }}" />
-		<a class="uploadable-url-preview-url" href="{{ model.url }}" ng-if="disabled" target="uploadedPreview">{{ model.title }}</a>
+		<input type="text" ng-model="model.title" ng-show="model.uploaded && !(disabled)"
+			placeholder="{{ placeholder }}" />
+		<a class="uploadable-url-preview-url" href="{{ model.url }}" ng-if="disabled"
+			target="uploadedPreview">{{ model.title }}</a>
 		<span class="uploadable-url-preview-url"><a href="{{ model.url }}" target="_blank">{{ model.url }}</a></span>
 	</div>
 </div>
-

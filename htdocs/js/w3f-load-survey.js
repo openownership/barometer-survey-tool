@@ -22,7 +22,8 @@ angular.module('W3FSurveyLoader', ['GoogleSpreadsheets'])
     $rootScope.answerSheets = {
       'Control': null,
       'Answers': null,
-      'Notes': null
+      'Notes': null,
+      'Resources': null
     };
 
     // Get control and set rootScope.control and $rootScope.links.control values
@@ -334,7 +335,7 @@ angular.module('W3FSurveyLoader', ['GoogleSpreadsheets'])
         var q = $q.defer();
 
         // Populate notes for each question
-        return gs.getRows(answerKey, $rootScope.answerSheets.Notes).then(function (rows) {
+        gs.getRows(answerKey, $rootScope.answerSheets.Notes).then(function (rows) {
           _.each(rows, function (note) {
             if (!$rootScope.notes[note.questionid]) {
               console.log("Note with qid=" + note.questionid + " does not correspond to any survey question");
@@ -344,14 +345,14 @@ angular.module('W3FSurveyLoader', ['GoogleSpreadsheets'])
             // Avoid duplicate notes:
             var notes = $rootScope.notes[note.questionid];
             /*
-var lastNote = notes.length > 0 && notes[notes.length-1];
+            var lastNote = notes.length > 0 && notes[notes.length-1];
 
-if(!lastNote || lastNote && lastNote.note != note.note) {
-if(!note.date && note.edited) {
-note.date = note.edited;
-}
-$rootScope.notes[note.questionid].push(note);
-}
+            if(!lastNote || lastNote && lastNote.note != note.note) {
+            if(!note.date && note.edited) {
+            note.date = note.edited;
+            }
+            $rootScope.notes[note.questionid].push(note);
+            }
             */
             $rootScope.notes[note.questionid].push(note);
           });
@@ -365,6 +366,21 @@ $rootScope.notes[note.questionid].push(note);
 
         return q.promise;
       }
+
+      var loadUploads = function () {
+        $rootScope.loading = "Loading Uploads"
+
+        var q = $q.defer();
+        gs.getRows(answerKey, $rootScope.answerSheets.Resources).then(function (rows) {
+          _.each(rows, function (upload) {
+            upload.uploaded = true
+            $rootScope.uploads.push(upload)
+          })
+          q.resolve()
+        }, q.reject)
+        return q.promise;
+      }
+
 
       // Pull sheets from answer sheet and confirm they're all there.
       gs.getSheets(answerKey).then(function (sheets) {
@@ -380,9 +396,9 @@ $rootScope.notes[note.questionid].push(note);
 
         // We now have confirmed the answer spreadsheet has all of the required sheets,
         // load each one in sequence
-        loadControl().then(function () {
-          loadAnswers().then(function () {
-            loadNotes().then(function () {
+        loadAnswers().then(function () {
+          loadNotes().then(function () {
+            loadUploads().then(function () {
               if ($rootScope.status.error) {
                 deferred.resolve($rootScope.status);
               }
@@ -393,9 +409,9 @@ $rootScope.notes[note.questionid].push(note);
                   clear: 3000,
                 });
               }
-            }, loadError("Invalid notes"));
-          }, loadError("Invalid answers"));
-        }, loadError("Invalid control"));
+            }, loadError("Invalid uploads"));
+          }, loadError("Invalid notes"));
+        }, loadError("Invalid answers"));
       }, loadError("Invalid answer key"));
     };
 
@@ -439,7 +455,6 @@ $rootScope.notes[note.questionid].push(note);
     return {
       load: function (_answerKey) {
         answerKey = _answerKey;
-
         return load();
       },
       loadControlValues: loadControlValues

@@ -110,6 +110,9 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
     // Notes by Question ID
     $rootScope.notes = {};
 
+    // Uploads
+    $rootScope.uploads = []
+
     // (Unresolved) note counts by section ID
     $rootScope.noteCount = {};
 
@@ -1063,6 +1066,15 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
             $scope.placeholder = $scope.$eval(attrs.placeholder);
           }
         });
+        $scope.onChangeUploadSelect = function() {
+          $scope.model =  _.clone($scope.uploads.model);
+          $scope.model.disabled = true;
+          $scope.model.locked = true;
+        }
+        $scope.uploads = {
+          availableOptions: $rootScope.uploads,
+          model: { id: 'choose', title: 'Please choose a file' }
+        };
         if ($scope.model.url) {
           $scope.model.uploaded = true;
         }
@@ -1416,4 +1428,7 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
     window.signinFailure = function () {
       // Do nothing
     }
+
+    window.init()
   }]);
+

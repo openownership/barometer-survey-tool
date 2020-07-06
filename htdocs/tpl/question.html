@@ -92,7 +92,7 @@
 	<div ng-if="question.wantexamples == 'Yes'" class="examples">
             <span ng-if="(response['response'] == '0') || response['response']">
 		<label>
-			<span ng-hide="readOnly || commentOnly">Upload supporting files</span>
+			<span ng-hide="readOnly || commentOnly">Add supporting files:</span>
 			<span ng-if="(readOnly || commentOnly) && response.example.length">Supporting files</span>
 
 			<flexible-list collection="response.example" at-least="0" ng-disabled="readOnly || commentOnly" />
