@@ -111,8 +111,8 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
     $rootScope.notes = {};
 
     // Uploads
-    $rootScope.uploads = []
-    $rootScope.queuedUploads = []
+    $rootScope.uploads = {}
+    $rootScope.queuedUploads = {}
 
     // (Unresolved) note counts by section ID
     $rootScope.noteCount = {};
@@ -390,7 +390,9 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
 
         // Combine queued uploads
         _.each(queue.uploads, function (upload) {
-          _.union($rootScope.queuedUploads, upload);
+          if (upload && $rootScope.queuedUploads[upload.id]) {
+            _.extend($rootScope.queuedUploads[upload.id], upload);
+          }
         });
 
         // Watch uploads
@@ -461,7 +463,7 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
         var processQueue = {
           responses: {},
           notes: {},
-          uploads: []
+          uploads: {}
         };
 
         // Write data to the Answer sheet. If this is called with a write in progress,
@@ -475,7 +477,6 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
             if (section == 'responses' && $rootScope.commentOnly) {
               return;
             }
-
             _.each(queue[section], function (response, qid) {
               var q = queue[section];
               var pq = processQueue[section];
@@ -494,7 +495,8 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
                 _.each(queue[section], function (upload, iterator) {
                   if (upload && !upload.uploaded) {
                     var newUpload = _.extend({}, {
-                      title: upload.name,
+                      title: upload.title,
+                      filename: upload.name,
                       thumbnail: upload.thumbnailLink,
                       url: upload.webViewLink,
                       id: upload.id
@@ -502,9 +504,9 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
                     var promise = gs.insertRow($rootScope.answerSheets.Resources, newUpload);
                     promise.then(function (row) {
                       row.uploaded = true
-                      $rootScope.uploads.push(row)
+                      $rootScope.uploads[row.id] = row
                     });
-                    pq.push(promise);
+                    pq[upload.id] = promise;
                     upload.uploaded = true
 
                   }
@@ -713,7 +715,7 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
             return;
 
           // Also don't bother if there's nothing to save
-          if (_.isEmpty(queue.notes) && _.isEmpty(queue.responses))
+          if (_.isEmpty(queue.notes) && _.isEmpty(queue.responses) && _.isEmpty(queue.uploads))
             return;
 
           var q = $q.defer();
@@ -1104,24 +1106,32 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
             $scope.placeholder = $scope.$eval(attrs.placeholder);
           }
         });
+        $scope.onClickURLSubmit = function () {
+          if ($scope.model) {
+
+            $scope.model.disabled = true;
+            $scope.model.locked = true;
+          }
+        }
         $scope.onChangeUploadSelect = function () {
           if ($scope.model) {
+            var currentTitle = $scope.model.title
             $scope.model = _.clone($scope.uploads.model);
+            if (currentTitle) $scope.model.title = currentTitle
             $scope.model.disabled = true;
             $scope.model.locked = true;
           }
 
         }
+        var uploadsList = Object.values($rootScope.uploads)
         $scope.uploads = {
-          availableOptions: $rootScope.uploads,
+          availableOptions: uploadsList,
           model: { id: 'choose', title: 'Please choose a file' }
         };
 
-
-
         $rootScope.$watchCollection('uploads', function () {
           $scope.uploads = {
-            availableOptions: $rootScope.uploads,
+            availableOptions: Object.values($rootScope.uploads),
             model: { id: 'choose', title: 'Please choose a file' }
           };
         })
@@ -1175,7 +1185,7 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
 
               $scope.model.fileId = results.data.id;
               $scope.model.url = results.data.webViewLink;
-              $scope.model.title = results.data.name;
+              $scope.model.fileName = results.data.name;
               $scope.model.locked = true;
               $scope.model.uploaded = true;
 
@@ -1201,7 +1211,8 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
               });
 
               $q.all([userPermPromise, coordinatorPermPromise]).then(function () {
-                $rootScope.queuedUploads.push(results.data);
+                results.data.title = $scope.model.title
+                $rootScope.queuedUploads[results.data.id] = results.data;
               }, function () {
                 $scope.uploadState = "Failed setting upload permissions! Try again.";
                 $scope.model.locked = false;

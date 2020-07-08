@@ -374,7 +374,7 @@ angular.module('W3FSurveyLoader', ['GoogleSpreadsheets'])
         gs.getRows(answerKey, $rootScope.answerSheets.Resources).then(function (rows) {
           _.each(rows, function (upload) {
             upload.uploaded = true
-            $rootScope.uploads.push(upload)
+            $rootScope.uploads[upload.id] = upload
           })
           q.resolve()
         }, q.reject)
