@@ -498,7 +498,7 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
                       title: upload.title,
                       filename: upload.name,
                       thumbnail: upload.thumbnailLink,
-                      url: upload.webViewLink,
+                      url: upload.webViewLink ? upload.webViewLink : upload.url,
                       id: upload.id
                     })
                     var promise = gs.insertRow($rootScope.answerSheets.Resources, newUpload);
@@ -1108,7 +1108,12 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
         });
         $scope.onClickURLSubmit = function () {
           if ($scope.model) {
-
+            var id = Date.now()
+            $rootScope.queuedUploads[id] = {
+              title: $scope.model.title,
+              url: $scope.model.url,
+              id: id
+            }
             $scope.model.disabled = true;
             $scope.model.locked = true;
           }
@@ -1116,10 +1121,12 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
         $scope.onChangeUploadSelect = function () {
           if ($scope.model) {
             var currentTitle = $scope.model.title
+            var category = $scope.model.category
             $scope.model = _.clone($scope.uploads.model);
             if (currentTitle) $scope.model.title = currentTitle
             $scope.model.disabled = true;
             $scope.model.locked = true;
+            $scope.model.category = category;
           }
 
         }
@@ -1240,6 +1247,7 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
       link: function ($scope, element, attrs) {
         $scope.atLeast = parseInt(attrs.atLeast);
 
+
         var load = function (newValue) {
           $scope.list = newValue;
 
@@ -1256,6 +1264,10 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
 
         $scope.$parent.$watch(attrs.collection, load, true);
 
+        $rootScope.$watchCollection('uploads', function () {
+          $scope.uploads = Object.values($rootScope.uploads)
+        })
+
         $scope.$watch('list', function (newValue) {
           $scope.$parent.collection = newValue;
         });
@@ -1264,8 +1276,11 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
           $scope.disabled = disabled;
         });
 
-        $scope.add = function () {
-          $scope.list.push({});
+        $scope.add = function (category) {
+          var newResource = {
+            category: category
+          }
+          $scope.list.push(newResource);
         }
       }
     }

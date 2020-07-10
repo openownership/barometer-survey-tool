@@ -5,38 +5,26 @@
 
     <div>
       <label for="title">
-        <input type="text" name="title" ng-model="model.title" placeholder="Give the file a descriptive label" />
-      </label>
-      <label>
-        URL
-        <input type="radio" ng-model="doctype" value="url" />
-      </label><br />
-      <label>
-        Upload
-        <input type="radio" ng-model="doctype" value="upload" />
-      </label><br />
-      <label ng-show="uploads.availableOptions.length > 0">
-        Existing upload
-        <input type="radio" ng-model="doctype" value="existing" />
+        <input type="text" name="title" ng-model="model.title" placeholder="Give the {{model.category}} a descriptive label" />
       </label>
     </div>
 
 
 
 
-    <div ng-if="uploads.availableOptions.length > 0 && doctype == 'existing'">
+    <div ng-if="uploads.availableOptions.length > 0 && model.category == 'existing resource'">
       <label for="repeatSelect">Select existing: </label>
       <select name="upload-select" id="upload-select" ng-change="onChangeUploadSelect()"
         ng-options="option.title for option in uploads.availableOptions track by option.url"
         ng-model="uploads.model"></select>
     </div>
 
-    <div ng-if="doctype == 'url'">
+    <div ng-if="model.category == 'url'">
       <input type="text" ng-model="model.url" placeholder="Please ensure the url starts with https:// or http://" />
       <input type="submit" ng-click="onClickURLSubmit()" value="Confirm" ng-disabled="!model.url || !model.url.includes('http')"/>
     </div>
 
-    <div class="uploadable-url-url" ng-if="doctype == 'upload'">
+    <div class="uploadable-url-url" ng-if="model.category == 'file'">
       <div class="uploadable-url-upload" ng-if="!model.locked && !disabled">
 
         <label class="button" ng-disabled="model.uploading || !model.title">
@@ -50,7 +38,7 @@
 
 
   <div class="uploadable-url-preview-url" ng-if="model.locked">
-    <input type="text" ng-model="model.title" placeholder="Give the file a descriptive label" />
+    <input type="text" ng-model="model.title" placeholder="Give the {{model.category}} a descriptive label" />
     <a class="uploadable-url-preview-url" href="{{ model.url }}" ng-if="disabled"
       target="uploadedPreview">{{ model.title }}</a>
     <span class="uploadable-url-preview-url"><a href="{{ model.url }}" target="_blank">{{ model.url }}</a></span>
