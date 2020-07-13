@@ -5,7 +5,7 @@
 
     <div>
       <label for="title">
-        <input type="text" name="title" ng-model="model.title" placeholder="Give the {{model.category}} a descriptive label" />
+        ✏️ <input type="text" name="title" ng-model="model.title" placeholder="Please provide a title for this {{model.category}}" />
       </label>
     </div>
 
@@ -13,14 +13,14 @@
 
 
     <div ng-if="uploads.availableOptions.length > 0 && model.category == 'existing resource'">
-      <label for="repeatSelect">Select existing: </label>
+      <label for="repeatSelect">Select existing attachment: </label>
       <select name="upload-select" id="upload-select" ng-change="onChangeUploadSelect()"
         ng-options="option.title for option in uploads.availableOptions track by option.url"
         ng-model="uploads.model"></select>
     </div>
 
     <div ng-if="model.category == 'url'">
-      <input type="text" ng-model="model.url" placeholder="Please ensure the url starts with https:// or http://" />
+      🔗 <input type="text" ng-model="model.url" placeholder="Please ensure the url starts with https:// or http://" />
       <input type="submit" ng-click="onClickURLSubmit()" value="Confirm" ng-disabled="!model.url || !model.url.includes('http')"/>
     </div>
 
@@ -28,7 +28,7 @@
       <div class="uploadable-url-upload" ng-if="!model.locked && !disabled">
 
         <label class="button" ng-disabled="model.uploading || !model.title">
-          {{ uploadState || "Upload..." }}
+          {{ uploadState || "Attach file..." }}
           <input type="file" onchange="angular.element(this).scope().upload(this)"
             ng-disabled="model.uploading || !model.title" />
         </label>

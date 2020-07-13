@@ -9,13 +9,9 @@
 		</li>
 
 		<li class="flexible-list-item">
-			<a ng-click="add('file')" class="flexible-list-add" ng-if="!disabled"><span class="icon-plus"></span> Upload a file</a>
-		</li>
-		<li class="flexible-list-item">
-			<a ng-click="add('url')" class="flexible-list-add" ng-if="!disabled"><span class="icon-plus"></span> Add a url</a>
-		</li>
-		<li class="flexible-list-item" ng-if="uploads.length > 0">
-			<a ng-click="add('existing resource')" class="flexible-list-add" ng-if="!disabled"><span class="icon-plus"></span> Choose existing resource</a>
+			<a ng-click="add('file')" class="flexible-list-add" ng-if="!disabled"><span class="icon-plus"></span> 📎 Attach a file</a> |
+			<a ng-click="add('url')" class="flexible-list-add" ng-if="!disabled"><span class="icon-plus"></span> 🔗 Attach a web link</a>
+			<a ng-click="add('existing resource')" class="flexible-list-add" ng-if="!disabled">| <span class="icon-plus"></span> Choose an existing attachment</a>
 		</li>
 	</ul>
 </section>

@@ -92,8 +92,8 @@
 	<div ng-if="question.wantexamples == 'Yes'" class="examples">
             <span ng-if="(response['response'] == '0') || response['response']">
 		<label>
-			<span ng-hide="readOnly || commentOnly">Add supporting files:</span>
-			<span ng-if="(readOnly || commentOnly) && response.example.length">Supporting files</span>
+			<span ng-hide="readOnly || commentOnly">Attach supporting evidence:</span>
+			<span ng-if="(readOnly || commentOnly) && response.example.length">Supporting evidence</span>
 
 			<flexible-list collection="response.example" at-least="0" ng-disabled="readOnly || commentOnly" />
 			<p class="description">Note: Any uploaded files will be saved on your Google Drive and will be publicly accessible.</p>
