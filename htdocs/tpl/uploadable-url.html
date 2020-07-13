@@ -21,14 +21,14 @@
 
     <div ng-if="model.category == 'url'">
       🔗 <input type="text" ng-model="model.url" placeholder="Please ensure the url starts with https:// or http://" />
-      <input type="submit" ng-click="onClickURLSubmit()" value="Confirm" ng-disabled="!model.url || !model.url.includes('http')"/>
+      <input type="submit" ng-click="onClickURLSubmit()" value="Attach URL" ng-disabled="!model.url || !model.url.includes('http')"/>
     </div>
 
     <div class="uploadable-url-url" ng-if="model.category == 'file'">
       <div class="uploadable-url-upload" ng-if="!model.locked && !disabled">
 
         <label class="button" ng-disabled="model.uploading || !model.title">
-          {{ uploadState || "Attach file..." }}
+          {{ uploadState || "Select file to upload..." }}
           <input type="file" onchange="angular.element(this).scope().upload(this)"
             ng-disabled="model.uploading || !model.title" />
         </label>
@@ -38,8 +38,8 @@
 
 
   <div class="uploadable-url-preview-url" ng-if="model.locked">
-    <input type="text" ng-model="model.title" placeholder="Give the {{model.category}} a descriptive label" />
-    <a class="uploadable-url-preview-url" href="{{ model.url }}" ng-if="disabled"
+    Title: <input type="text" ng-model="model.title" placeholder="Give the {{model.category}} a descriptive label" />
+    Resource: <a class="uploadable-url-preview-url" href="{{ model.url }}" ng-if="disabled"
       target="uploadedPreview">{{ model.title }}</a>
     <span class="uploadable-url-preview-url"><a href="{{ model.url }}" target="_blank">{{ model.url }}</a></span>
   </div>

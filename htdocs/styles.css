@@ -779,7 +779,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b2e1ff', end
 .uploadable-url {
 }
 	.uploadable-url input[type="text"] {
-		width: 100%;
+		width: 90%;
 		margin-bottom: .5em;
 	}
 	.uploadable-url input[type="text"],
@@ -897,9 +897,3 @@ div.Legal label, div.Systems label, div.Data label {
     margin: 1em;
 }
 
-.question .examples {
-    width: 45%;
-    clear: none;
-    display: inline-block;
-    margin: 1em;
-}

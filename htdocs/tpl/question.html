@@ -92,7 +92,8 @@
 	<div ng-if="question.wantexamples == 'Yes'" class="examples">
             <span ng-if="(response['response'] == '0') || response['response']">
 		<label>
-			<span ng-hide="readOnly || commentOnly">Attach supporting evidence:</span>
+			<h4 ng-hide="readOnly || commentOnly">Attach supporting evidence:</h4>
+			<span ng-hide="readOnly || commentOnly">Use the title field to provide page/section references if required.</span>
 			<span ng-if="(readOnly || commentOnly) && response.example.length">Supporting evidence</span>
 
 			<flexible-list collection="response.example" at-least="0" ng-disabled="readOnly || commentOnly" />
