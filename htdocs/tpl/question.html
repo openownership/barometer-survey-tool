@@ -90,7 +90,7 @@
 	</div>
 
 	<div ng-if="question.wantexamples == 'Yes'" class="examples">
-            <span ng-if="(response['response'] == '0') || response['response']">
+            
 		<label>
 			<h4 ng-hide="readOnly || commentOnly">Attach supporting evidence:</h4>
 			<span ng-hide="readOnly || commentOnly">Use the title field to provide page/section references if required.</span>
@@ -99,11 +99,6 @@
 			<flexible-list collection="response.example" at-least="0" ng-disabled="readOnly || commentOnly" />
 			<p class="description">Note: Any uploaded files will be saved on your Google Drive and will be publicly accessible.</p>
 		</label>
-            </span>
-
-            <span ng-if="!response['response'] && !readOnly && !commentOnly">
-                        <span class="icon-plus">  </span>You can upload supporting files here once you have completed the required components of this question.
-            </span>
  
 	</div>
 
