@@ -5,7 +5,7 @@
 
     <div>
       <label for="title">
-        ✏️ <input type="text" name="title" ng-model="model.title" placeholder="Please provide a title for this {{model.category}}" />
+        ✏️ <input type="text" name="title" ng-model="model.title" placeholder="Please first provide a title for this {{model.category}}" />
       </label>
     </div>
 
@@ -20,7 +20,7 @@
     </div>
 
     <div ng-if="model.category == 'url'">
-      🔗 <input type="text" ng-model="model.url" placeholder="Please ensure the url starts with https:// or http://" />
+      🔗 <input type="text" ng-model="model.url" placeholder="Then make sure the url starts with https:// or http://" />
       <input type="submit" ng-click="onClickURLSubmit()" value="Attach URL" ng-disabled="!model.url || !model.url.includes('http')"/>
     </div>
 
@@ -28,7 +28,7 @@
       <div class="uploadable-url-upload" ng-if="!model.locked && !disabled">
 
         <label class="button" ng-disabled="model.uploading || !model.title">
-          {{ uploadState || "Select file to upload..." }}
+          {{ uploadState || "Then select file to upload..." }}
           <input type="file" onchange="angular.element(this).scope().upload(this)"
             ng-disabled="model.uploading || !model.title" />
         </label>
