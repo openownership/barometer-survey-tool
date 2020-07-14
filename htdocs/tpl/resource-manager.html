@@ -1,0 +1,13 @@
+<article ng-if="uploads.length > 0" class="resource-manager">
+    <button ng-click="toggleResources()">Manage resources</button>
+    <ul class="resources-list" ng-if="areResourcesVisible">
+        <li ng-repeat="resource in uploads track by $index">
+            <form>
+                <input type="text" value="{{resource.title}}" ng-model="resource.title" />
+                <a class="uploadable-url-preview-url" href="{{ resource.url }}" 
+      target="uploadedPreview">{{ resource.url }}</a>
+            </form>
+        </li>
+    </ul>
+
+</article>
