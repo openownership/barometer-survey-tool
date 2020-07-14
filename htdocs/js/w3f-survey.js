@@ -1089,6 +1089,30 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
     }
   }])
 
+
+  // For managing uploaded resources
+  .directive('resourceManager', ['$rootScope', '$timeout', function ($rootScope, $timeout) {
+    return {
+      restrict: 'E',
+      templateUrl: 'tpl/resource-manager.html',
+      replace: true,
+      scope: {
+        model: '='
+      },
+      link: function ($scope, element, attrs) {
+
+        $scope.areResourcesVisible = false;
+
+        $scope.toggleResources = function() {
+          $scope.areResourcesVisible = !$scope.areResourcesVisible;
+        }
+        $rootScope.$watchCollection('uploads', function () {
+          $scope.uploads = Object.values($rootScope.uploads)
+        })
+      }
+    }
+  }])
+
   // A field for specifying a URL or a uploaded file
   .directive('uploadableUrl', ['$rootScope', '$http', '$q', function ($rootScope, $http, $q) {
     return {
@@ -1408,6 +1432,7 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
       }
     }
   }])
+
 
   // Initialize this module
   .run(['$rootScope', '$q', 'spreadsheets', function ($rootScope, $q, gs) {
