@@ -795,7 +795,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b2e1ff', end
 		text-overflow: ellipsis;
 	}
 	span.uploadable-url-preview-url {
-		display: block;
 		color: #777;
 		font-size: .9em;
 	}

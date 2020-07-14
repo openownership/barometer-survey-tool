@@ -5,7 +5,8 @@
 
     <div>
       <label for="title">
-        ✏️ <input type="text" name="title" ng-model="model.title" placeholder="Please first provide a title for this {{model.category}}" />
+        <span role="img" aria-label="Title">✏️</span> <input type="text" name="title" ng-model="model.title"
+          placeholder="Please first provide a title for this {{model.category}}" />
       </label>
     </div>
 
@@ -20,8 +21,10 @@
     </div>
 
     <div ng-if="model.category == 'url'">
-      🔗 <input type="text" ng-model="model.url" placeholder="Then make sure the url starts with https:// or http://" />
-      <input type="submit" ng-click="onClickURLSubmit()" value="Attach URL" ng-disabled="!model.url || !model.url.includes('http')"/>
+      <label><span role="img" aria-label="URL">🔗</span> <input type="text" name="url" ng-model="model.url"
+          placeholder="Then make sure the url starts with https:// or http://" /></label>
+      <input type="submit" ng-click="onClickURLSubmit()" value="Attach URL"
+        ng-disabled="!model.url || !model.url.includes('http')" />
     </div>
 
     <div class="uploadable-url-url" ng-if="model.category == 'file'">
@@ -38,8 +41,9 @@
 
 
   <div class="uploadable-url-preview-url" ng-if="model.locked">
-    Title: <input type="text" ng-model="model.title" placeholder="Give the {{model.category}} a descriptive label" />
-    Resource: <a class="uploadable-url-preview-url" href="{{ model.url }}" ng-if="disabled"
+    <label>Title: <input type="text" ng-model="model.title"
+        placeholder="Give the {{model.category}} a descriptive label" /></label><br/>
+      Resource: <a class="uploadable-url-preview-url" href="{{ model.url }}" ng-if="disabled"
       target="uploadedPreview">{{ model.title }}</a>
     <span class="uploadable-url-preview-url"><a href="{{ model.url }}" target="_blank">{{ model.url }}</a></span>
   </div>
