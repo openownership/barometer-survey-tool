@@ -738,8 +738,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b2e1ff', end
 	padding: 0;
 }
 	.flexible-list [class^="icon-"], .flexible-list [class*=" icon-"] {
-		cursor: pointer;
 		padding-right: .5em;
+		color: #3079ed;
 	}
 	.flexible-list .flexible-list-delete {
 		padding: 5px;
@@ -896,3 +896,27 @@ div.Legal label, div.Systems label, div.Data label {
     margin: 1em;
 }
 
+.resource-manager.showing-true {
+	position: fixed;
+	width: 100vw;
+	height: 100vh;
+	z-index: 5;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	background: rgba(255,255,255,.95);
+	padding: 3rem;
+	text-align: center;
+}
+
+.resource-manager.showing-true .panel {
+	width: 600px;
+	max-width: 95%;
+	margin: 0px auto;
+	text-align: left;
+	background: white;
+	border: aliceblue;
+	padding: 3rem;
+	margin-top: 2rem;
+	border: 5px solid aliceblue;
+}

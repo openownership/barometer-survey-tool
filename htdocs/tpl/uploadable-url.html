@@ -21,10 +21,12 @@
     </div>
 
     <div ng-if="model.category == 'url'">
-      <label><span role="img" aria-label="URL">🔗</span> <input type="text" name="url" ng-model="model.url"
-          placeholder="Then make sure the url starts with https:// or http://" /></label>
-      <input type="submit" ng-click="onClickURLSubmit()" value="Attach URL"
-        ng-disabled="!model.url || !model.url.includes('http')" />
+      <form ng-submit="onClickURLSubmit()">
+        <label><span role="img" aria-label="URL">🔗</span> <input type="text" name="url" ng-model="model.url"
+            placeholder="Then make sure the url starts with https:// or http://" /></label>
+        <input type="submit" value="Attach URL"
+          ng-disabled="!model.url || !model.url.includes('http')" />
+      </form>
     </div>
 
     <div class="uploadable-url-url" ng-if="model.category == 'file'">
@@ -40,11 +42,23 @@
   </div>
 
 
-  <div class="uploadable-url-preview-url" ng-if="model.locked">
+  <div class="uploadable-url-preview-url" ng-if="model.locked && !isResourceManager">
     <label>Title: <input type="text" ng-model="model.title"
-        placeholder="Give the {{model.category}} a descriptive label" /></label><br/>
-      Resource: <a class="uploadable-url-preview-url" href="{{ model.url }}" ng-if="disabled"
+        placeholder="Give the {{model.category}} a descriptive label" /></label><br />
+    Resource: <a class="uploadable-url-preview-url" href="{{ model.url }}" ng-if="disabled"
       target="uploadedPreview">{{ model.title }}</a>
     <span class="uploadable-url-preview-url"><a href="{{ model.url }}" target="_blank">{{ model.url }}</a></span>
+  </div>
+
+  <div class="uploadable-url-preview-url" ng-if="model.locked && isResourceManager">
+    <form ng-submit="updateUpload(model)">
+      <label>Title: <input type="text" ng-model="model.title"
+          placeholder="Give the {{model.category}} a descriptive label" ng-focus="getOriginalTitle()"
+          ng-change="handleChangedTitle()" /></label><br />
+      Resource: <a class="uploadable-url-preview-url" href="{{ model.url }}" ng-if="disabled"
+        target="uploadedPreview">{{ model.title }}</a>
+      <span class="uploadable-url-preview-url"><a href="{{ model.url }}" target="_blank">{{ model.url }}</a></span>
+      <button type="submit" ng-show="titleChanged">Save edit</button>
+    </form>
   </div>
 </div>

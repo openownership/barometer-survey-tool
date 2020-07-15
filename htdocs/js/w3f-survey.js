@@ -493,13 +493,37 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
 
               if (section == 'uploads') {
                 _.each(queue[section], function (upload, iterator) {
-                  if (upload && !upload.uploaded) {
+                  if (upload && upload.updateMe) {
+                    var promise = gs.updateUpload($rootScope.answerSheets.Resources, {
+                      id: upload.id,
+                      title: upload.title
+                    });
+                    promise.then(function (row) {
+                      $rootScope.uploads[upload.id] = row
+                    });
+                  } else if (upload && upload.deleteMe) {
+                    var promise = gs.deleteUpload($rootScope.answerSheets.Resources, upload.id);
+                    promise.then(function () {
+                      if ($rootScope.uploads[upload.id]) {
+                        delete $rootScope.uploads[upload.id]
+                      }
+                    });
+                    promise.catch(function (error) {
+                      $rootScope.status = {
+                        error: true,
+                        message: "Error deleting upload. Please check your connection, reload and try again"
+                      };
+                      // Restore upload
+                      $rootScope.uploads[upload.id] = upload
+                    })
+
+                  } else if (upload && !upload.uploaded) {
                     var newUpload = _.extend({}, {
                       title: upload.title,
                       filename: upload.name,
                       thumbnail: upload.thumbnailLink,
                       url: upload.webViewLink ? upload.webViewLink : upload.url,
-                      id: upload.id
+                      id: upload.id,
                     })
                     var promise = gs.insertRow($rootScope.answerSheets.Resources, newUpload);
                     promise.then(function (row) {
@@ -510,6 +534,7 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
                     upload.uploaded = true
 
                   }
+
                 });
 
               } else if (section == 'responses') {
@@ -1095,19 +1120,26 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
     return {
       restrict: 'E',
       templateUrl: 'tpl/resource-manager.html',
-      replace: true,
-      scope: {
-        model: '='
-      },
+      scope: {},
       link: function ($scope, element, attrs) {
 
+        $scope.elementId = 'el-'+ Math.random().toString().split('.')[1]
         $scope.areResourcesVisible = false;
 
-        $scope.toggleResources = function() {
-          $scope.areResourcesVisible = !$scope.areResourcesVisible;
+        $scope.shouldHideExisting = true;
+        $scope.openResources = function () {
+          $scope.areResourcesVisible = true
+        }
+        $scope.closeResources = function () {
+          $scope.areResourcesVisible = false
         }
         $rootScope.$watchCollection('uploads', function () {
           $scope.uploads = Object.values($rootScope.uploads)
+        })
+        $scope.$on('close-resources', function () {
+          $scope.$apply(function () {
+            $scope.areResourcesVisible = false
+          })
         })
       }
     }
@@ -1120,7 +1152,8 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
       restrict: 'E',
       replace: true,
       scope: {
-        model: '='
+        model: '=',
+        isResourceManager: '=manager'
       },
 
       link: function ($scope, element, attrs) {
@@ -1130,6 +1163,24 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
             $scope.placeholder = $scope.$eval(attrs.placeholder);
           }
         });
+
+        $scope.titleChanged = false
+        $scope.getOriginalTitle = function () {
+          if (!$scope.originalTitle) {
+            $scope.originalTitle = $scope.model.title;
+          }
+        }
+        $scope.handleChangedTitle = function () {
+          if ($scope.model.title != $scope.originalTitle) {
+            $scope.titleChanged = true;
+          } else {
+            $scope.titleChanged = false;
+          }
+        }
+        $scope.updateUpload = function (model) {
+          model.updateMe = true
+          $rootScope.queuedUploads[model.id] = model;
+        }
         $scope.onClickURLSubmit = function () {
           if ($scope.model) {
             var id = Date.now()
@@ -1273,7 +1324,28 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
 
 
         var load = function (newValue) {
-          $scope.list = newValue;
+          if (newValue) {
+            var lockedValue = []
+
+
+            if ($scope.isResourceManager) {
+              lockedValue = newValue.map(function (file) {
+                var upload = _.extend(file, {
+                  category: file.id[1] === 5 ? 'url' : 'file',
+                  disabled: true,
+                  locked: true,
+                })
+                return upload
+              })
+              if ($scope.currentlyEditing) {
+                lockedValue.push($scope.currentlyEditing)
+                $scope.currentlyEditing = false
+              }
+            } else {
+              lockedValue = newValue
+            }
+            $scope.list = lockedValue
+          }
 
           if (!$scope.list) {
             $scope.list = [];
@@ -1286,11 +1358,32 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
           }
         }
 
+
+
+        $scope.isResourceManager = $scope.$parent.shouldHideExisting ? true : false;
+
         $scope.$parent.$watch(attrs.collection, load, true);
 
-        $rootScope.$watchCollection('uploads', function () {
-          $scope.uploads = Object.values($rootScope.uploads)
-        })
+        $scope.deleteItem = function (index) {
+          // Remove from list
+          var deletedId = $scope.list[index].id
+          $scope.list.splice(index, 1)
+          // If we're in resource manager, delete the upload
+          if ($scope.isResourceManager && deletedId) {
+            $rootScope.queuedUploads[deletedId] = _.extend($rootScope.uploads[deletedId], {
+              deleteMe: true
+            })
+            // optimistically remove upload
+            delete $rootScope.uploads[deletedId]
+          }
+        }
+
+        if (!$scope.isResourceManager) {
+          $rootScope.$watchCollection('uploads', function () {
+            $scope.uploads = Object.values($rootScope.uploads)
+          })
+        }
+
 
         $scope.$watch('list', function (newValue) {
           $scope.$parent.collection = newValue;
@@ -1305,6 +1398,7 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
             category: category
           }
           $scope.list.push(newResource);
+          $scope.currentlyEditing = newResource
         }
       }
     }
@@ -1441,6 +1535,22 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
 
     // Broadcast to all scopes when popups or notes should be closed
     // because we clicked on the document
+
+    document.onkeydown = function (evt) {
+      evt = evt || window.event;
+      var isEscape = false;
+      if ("key" in evt) {
+        isEscape = (evt.key === "Escape" || evt.key === "Esc");
+      } else {
+        isEscape = (evt.keyCode === 27);
+      }
+      if (isEscape) {
+        $(document).trigger('close-notes');
+        $rootScope.$broadcast('close-popups');
+        $rootScope.$broadcast('close-resources');
+      }
+    };
+
     $(document).on('click', function (ev) {
       if ($(ev.target).closest('.notes, .open-notes, .cancel-note, .save-note, .note-edit, .note-resolve').length == 0) {
         $(document).trigger('close-notes');

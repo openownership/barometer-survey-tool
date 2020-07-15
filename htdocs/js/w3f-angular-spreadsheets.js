@@ -244,6 +244,7 @@ angular.module("GoogleSpreadsheets", []).factory("spreadsheets", [
     }
 
     function deleteRow(url, id) {
+
       var deferred = defer()
 
       $http({
@@ -260,7 +261,6 @@ angular.module("GoogleSpreadsheets", []).factory("spreadsheets", [
         .then(function (response) {
           var xml = new DOMParser().parseFromString(response.data, "text/xml")
           var entries = xml.getElementsByTagName("entry")
-
           deferred.resolve({ id: id })
         })
         .then(function (error) {
@@ -270,12 +270,89 @@ angular.module("GoogleSpreadsheets", []).factory("spreadsheets", [
       return deferred.promise
     }
 
+    function updateUpload(sheet, upload) {
+      var deferred = defer()
+
+      getRows(sheet.key, sheet).then(function (uploads) {
+        var url;
+        angular.forEach(uploads, function (resource) {
+          if (resource.id === upload.id) {
+            url = resource[':links'].edit
+          }
+        })
+        var parseResponse = function (data) {
+          var xml = new DOMParser().parseFromString(data, "text/xml")
+          var entries = xml.getElementsByTagName("entry")
+
+          return mungeEntry(entries[0])
+        }
+
+        $http({
+          method: "POST",
+          url:
+            "/google-spreadsheets.php?action=submit&url=" + url + "&method=PUT",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          timeout: deferred,
+          data: $.param(upload),
+        })
+          .then(function (response) {
+            deferred.resolve(parseResponse(response.data))
+          })
+          .then(function (error) {
+            // Don't necessarily call 409 status an error: maybe nothing was going to change
+            // anyway
+            if (status == 409) {
+              deferred.resolve(parseResponse(error))
+            }
+
+            deferred.reject(error)
+          })
+      })
+      return deferred.promise
+    }
+
+    function deleteUpload(sheet, id) {
+
+      var deferred = defer()
+
+      getRows(sheet.key, sheet).then(function (uploads) {
+        var url;
+        angular.forEach(uploads, function (upload) {
+          if (upload.id === id) {
+            url = upload[':links'].edit
+          }
+        })
+        $http({
+          method: "GET",
+          url:
+            "/google-spreadsheets.php?action=submit&url=" +
+            url +
+            "&method=DELETE",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          timeout: deferred,
+        })
+          .then(function (response) {
+            deferred.resolve({ id: id })
+          })
+          .then(function (error) {
+            deferred.reject(error)
+          })
+      })
+      return deferred.promise
+    }
+
     return {
       getSheets: getSheets,
       getRows: getRows,
       updateRow: updateRow,
       insertRow: insertRow,
       deleteRow: deleteRow,
+      deleteUpload: deleteUpload,
+      updateUpload: updateUpload,
     }
   },
 ])

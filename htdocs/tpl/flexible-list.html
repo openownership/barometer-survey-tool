@@ -1,17 +1,17 @@
 <section class="file-container">
 	<ul class="flexible-list">
 		<li ng-repeat="item in list track by $index" class="flexible-list-item">
-			<a class="icon-close flexible-list-delete" ng-if="!disabled" ng-click="list.splice($index, 1)"></a>
+			<a class="icon-close flexible-list-delete" ng-if="!disabled" ng-click="deleteItem($index)"></a>
 
 			<div class="flexible-list-content">
-				<uploadable-url model="list[$index]" placeholder="'Filename'" ng-disabled="disabled" />
+				<uploadable-url model="list[$index]" placeholder="'Filename'" ng-disabled="disabled" manager="isResourceManager" />
 			</div>
 		</li>
 
-		<li class="flexible-list-item">
-			<a ng-click="add('file')" class="flexible-list-add" ng-if="!disabled"><span class="icon-plus"></span> 📎 Attach a file</a> |
-			<a ng-click="add('url')" class="flexible-list-add" ng-if="!disabled"><span class="icon-plus"></span> 🔗 Attach a web link</a>
-			<a ng-click="add('existing resource')" class="flexible-list-add" ng-if="!disabled">| <span class="icon-plus"></span> Choose an existing attachment</a>
+		<li class="flexible-list-item"><span class="icon-plus"></span>
+			<a ng-click="add('file')" class="flexible-list-add" ng-if="!disabled"> 📎 Attach a file</a> |
+			<a ng-click="add('url')" class="flexible-list-add" ng-if="!disabled"> 🔗 Attach a web link</a>
+			<a ng-click="add('existing resource')" class="flexible-list-add" ng-if="!disabled && uploads.length > 0 && !isResourceManager">| 📎 Choose an existing attachment</a>
 		</li>
 	</ul>
 </section>

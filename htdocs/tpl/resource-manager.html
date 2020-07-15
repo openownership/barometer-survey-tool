@@ -1,13 +1,18 @@
-<article ng-if="uploads.length > 0" class="resource-manager">
-    <button ng-click="toggleResources()">Manage resources</button>
-    <ul class="resources-list" ng-if="areResourcesVisible">
-        <li ng-repeat="resource in uploads track by $index">
-            <form>
-                <input type="text" value="{{resource.title}}" ng-model="resource.title" />
-                <a class="uploadable-url-preview-url" href="{{ resource.url }}" 
-      target="uploadedPreview">{{ resource.url }}</a>
-            </form>
-        </li>
-    </ul>
+<div class="resource-container">
+    <button class="resource-button" ng-click="openResources()" aria-controls="#{{elementId}}">Manage resources</button>
+    <article id="{{elementId}}" ng-if="areResourcesVisible" class="resource-manager showing-{{areResourcesVisible}}" aria-hidden="{{!areResourcesVisible}}">
+        <button aria-controls="#{{elementId}}" ng-click="closeResources()">Close resource manager</button>
+        <div class="panel">
+            <p>You can add, delete or edit resource titles here (to edit a URL, simply delete it and add it again).</p>
+            <p>Please note, removing / renaming a resource here won't remove or rename the file on answers you've
+                already
+                attached it to. To edit or remove resources for specific answers, head back to the specific question and
+                edit the resource there.</p>
+            <div ng-show="uploads.length === 0">
+                <strong>You have no resources, please add some below</strong>
+            </div>
+            <flexible-list class="resource-button" collection="uploads" at-least="0" ng-disabled="readOnly || commentOnly" />
+        </div>
 
-</article>
+    </article>
+</div>
