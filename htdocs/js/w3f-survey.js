@@ -1123,7 +1123,7 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
       scope: {},
       link: function ($scope, element, attrs) {
 
-        $scope.elementId = 'el-'+ Math.random().toString().split('.')[1]
+        $scope.elementId = 'el-' + Math.random().toString().split('.')[1]
         $scope.areResourcesVisible = false;
 
         $scope.shouldHideExisting = true;
@@ -1641,6 +1641,14 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
       // Do nothing
     }
 
-    window.init()
+    function safeInit() {
+      if (gapi) {
+        window.init()
+      } else {
+        console.log('checking again for gapi in 1s')
+        setTimeout(safeInit, 1000)
+      }
+    }
+    safeInit()
   }]);
 
