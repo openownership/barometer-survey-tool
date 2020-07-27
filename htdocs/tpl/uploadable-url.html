@@ -58,7 +58,7 @@
       Resource: <a class="uploadable-url-preview-url" href="{{ model.url }}" ng-if="disabled"
         target="uploadedPreview">{{ model.title }}</a>
       <span class="uploadable-url-preview-url"><a href="{{ model.url }}" target="_blank">{{ model.url }}</a></span>
-      <button type="submit" ng-show="titleChanged">Save edit</button>
+      <button type="submit" ng-show="titleChanged" class="edit-button">{{editSaving ? 'Saving...' : 'Save edit' }}</button>
     </form>
   </div>
 </div>

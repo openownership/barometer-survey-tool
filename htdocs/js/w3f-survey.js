@@ -17,6 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+var write, uploadCb;
+
 // Gimme a range op!
 Array.prototype.range = function (n) {
   return Array.apply(null, Array(n)).map(function (_, i) { return i; });
@@ -466,9 +468,27 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
           uploads: {}
         };
 
+        var uploadCallback = function () {
+          if (uploadCb) {
+            uploadCb();
+            uploadCb = null
+          }
+        }
+
+        var handleResourceError = function () {
+          $rootScope.status = {
+            error: true,
+            message: "Error handling resource. Please check your connection, reload and try again"
+          };
+        }
+
+
         // Write data to the Answer sheet. If this is called with a write in progress,
         // the values are queued for the next write.
-        var write = function () {
+        write = function (cb) {
+          if (cb) {
+            uploadCb = cb;
+          }
           var size = 0;
 
           // Process a queue for the three sections
@@ -500,22 +520,16 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
                     });
                     promise.then(function (row) {
                       $rootScope.uploads[upload.id] = row
-                    });
+                      uploadCallback()
+                    }, handleResourceError);
                   } else if (upload && upload.deleteMe) {
                     var promise = gs.deleteUpload($rootScope.answerSheets.Resources, upload.id);
                     promise.then(function () {
                       if ($rootScope.uploads[upload.id]) {
                         delete $rootScope.uploads[upload.id]
                       }
-                    });
-                    promise.catch(function (error) {
-                      $rootScope.status = {
-                        error: true,
-                        message: "Error deleting upload. Please check your connection, reload and try again"
-                      };
-                      // Restore upload
-                      $rootScope.uploads[upload.id] = upload
-                    })
+                      uploadCallback()
+                    }, handleResourceError)
 
                   } else if (upload && !upload.uploaded) {
                     var newUpload = _.extend({}, {
@@ -529,7 +543,9 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
                     promise.then(function (row) {
                       row.uploaded = true
                       $rootScope.uploads[row.id] = row
-                    });
+                      uploadCallback()
+                    }, handleResourceError);
+
                     pq[upload.id] = promise;
                     upload.uploaded = true
 
@@ -1156,6 +1172,8 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
         isResourceManager: '=manager'
       },
 
+
+
       link: function ($scope, element, attrs) {
         $scope.placeholder = attrs.placeholder ? $scope.$eval(attrs.placeholder) : '';
         $scope.$watch(attrs.placeholder, function (newValue, oldValue) {
@@ -1164,6 +1182,25 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
           }
         });
 
+
+        $scope.onChangeOnUpdateMessageHandler = function (onChangeMessage, onUpdateMessage, cb) {
+          $rootScope.status = {
+            message: onChangeMessage,
+            clear: 10000
+          };
+          write(function () {
+            $rootScope.status = {
+              message: onUpdateMessage + " " + new Date().format(),
+              success: true,
+              clear: 3000
+            };
+            if (cb) {
+              cb();
+            }
+          })
+        }
+
+        $scope.editSaving = false;
         $scope.titleChanged = false
         $scope.getOriginalTitle = function () {
           if (!$scope.originalTitle) {
@@ -1178,8 +1215,14 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
           }
         }
         $scope.updateUpload = function (model) {
+          $scope.editSaving = true;
           model.updateMe = true
           $rootScope.queuedUploads[model.id] = model;
+
+          $scope.titleChanged = false
+          $scope.onChangeOnUpdateMessageHandler('Saving edit', 'Title saved', function () {
+            $scope.editSaving = false;
+          })
         }
         $scope.onClickURLSubmit = function () {
           if ($scope.model) {
@@ -1189,8 +1232,11 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
               url: $scope.model.url,
               id: id
             }
+
             $scope.model.disabled = true;
             $scope.model.locked = true;
+
+            $scope.onChangeOnUpdateMessageHandler('Saving URL', 'URL saved')
           }
         }
         $scope.onChangeUploadSelect = function () {
@@ -1202,6 +1248,7 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
             $scope.model.disabled = true;
             $scope.model.locked = true;
             $scope.model.category = category;
+            $scope.onChangeOnUpdateMessageHandler('Saving Upload', 'Upload saved')
           }
 
         }
@@ -1233,6 +1280,8 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
             return;
           }
 
+
+
           var $index = $(upload).parents('.flexible-list-item').index();
 
           var file = upload.files[0];
@@ -1242,6 +1291,11 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
             return;
           }
           $scope.uploadState = "Uploading...";
+
+          $rootScope.status = {
+            message: 'Uploading...',
+            clear: 10000
+          };
 
           var fd = new FormData();
           fd.append('file', file);
@@ -1264,6 +1318,8 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
             function uploadSuccess(results) {
               $scope.uploading = false;
               $scope.uploadState = "Uploaded";
+
+
 
               $scope.model.fileId = results.data.id;
               $scope.model.url = results.data.webViewLink;
@@ -1369,12 +1425,25 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
           var deletedId = $scope.list[index].id
           $scope.list.splice(index, 1)
           // If we're in resource manager, delete the upload
-          if ($scope.isResourceManager && deletedId) {
-            $rootScope.queuedUploads[deletedId] = _.extend($rootScope.uploads[deletedId], {
-              deleteMe: true
+          if ($scope.isResourceManager) {
+            if (deletedId) {
+              $rootScope.queuedUploads[deletedId] = _.extend($rootScope.uploads[deletedId], {
+                deleteMe: true
+              })
+              // optimistically remove upload
+              delete $rootScope.uploads[deletedId]
+            }
+            $rootScope.status = {
+              message: "Deleting",
+              clear: 10000
+            };
+            write(function () {
+              $rootScope.status = {
+                message: "Resource deleted " + new Date().format(),
+                success: true,
+                clear: 3000
+              };
             })
-            // optimistically remove upload
-            delete $rootScope.uploads[deletedId]
           }
         }
 
@@ -1383,7 +1452,6 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
             $scope.uploads = Object.values($rootScope.uploads)
           })
         }
-
 
         $scope.$watch('list', function (newValue) {
           $scope.$parent.collection = newValue;
@@ -1642,11 +1710,10 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
     }
 
     function safeInit() {
-      if (gapi) {
-        window.init()
-      } else {
-        console.log('checking again for gapi in 1s')
+      if (!gapi) {
         setTimeout(safeInit, 1000)
+      } else {
+        window.init()
       }
     }
     safeInit()

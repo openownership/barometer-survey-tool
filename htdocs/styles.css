@@ -920,3 +920,7 @@ div.Legal label, div.Systems label, div.Data label {
 	margin-top: 2rem;
 	border: 5px solid aliceblue;
 }
+
+.edit-button {
+	display: block;
+}
