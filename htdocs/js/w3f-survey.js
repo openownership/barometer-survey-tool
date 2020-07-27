@@ -1642,11 +1642,11 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
     }
 
     function safeInit() {
-      if (gapi) {
-        window.init()
-      } else {
+      if (typeof(gapi) == 'undefined') {
         console.log('checking again for gapi in 1s')
         setTimeout(safeInit, 1000)
+      } else {
+        window.init()
       }
     }
     safeInit()
