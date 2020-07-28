@@ -8,7 +8,7 @@
 			</div>
 		</li>
 
-		<li class="flexible-list-item"><span class="icon-plus"></span>
+		<li class="flexible-list-item" ng-if="counter < 5"><span class="icon-plus"></span>
 			<a ng-click="add('file')" class="flexible-list-add" ng-if="!disabled"> 📎 Attach a file</a> |
 			<a ng-click="add('url')" class="flexible-list-add" ng-if="!disabled"> 🔗 Attach a web link</a>
 			<a ng-click="add('existing resource')" class="flexible-list-add" ng-if="!disabled && uploads.length > 0 && !isResourceManager">| 📎 Choose an existing attachment</a>

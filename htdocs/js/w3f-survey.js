@@ -1380,6 +1380,7 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
 
 
         var load = function (newValue) {
+
           if (newValue) {
             var lockedValue = []
 
@@ -1412,15 +1413,15 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
               $scope.list.push({});
             }
           }
+          $scope.counter = $scope.list.length;
         }
-
-
 
         $scope.isResourceManager = $scope.$parent.shouldHideExisting ? true : false;
 
         $scope.$parent.$watch(attrs.collection, load, true);
 
         $scope.deleteItem = function (index) {
+          $scope.counter--;
           // Remove from list
           var deletedId = $scope.list[index].id
           $scope.list.splice(index, 1)
@@ -1462,6 +1463,7 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
         });
 
         $scope.add = function (category) {
+          $scope.counter++
           var newResource = {
             category: category
           }
