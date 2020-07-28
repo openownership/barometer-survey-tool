@@ -349,9 +349,12 @@ button {
  * Notes
  */
 .open-notes {
-	position: absolute;
+	float:right;
+	clear:none;
+	display:inline;
+	/* position: absolute;
 	left: -3.25em;
-	top: -.25em;
+	top: -.25em; */
 	height: 24px;
 	text-indent: 0;
 	color: #fff;
@@ -894,6 +897,20 @@ div.Legal label, div.Systems label, div.Data label {
     clear: none;
     display: inline-block;
     margin: 1em;
+}
+
+.justification.examples-Yes {
+	width:48%;
+}
+
+.justification.examples-Yes textarea {
+	height:16em;
+}
+
+.examples.justification-Yes {
+	width:48%;
+	clear:none;
+	float:right;
 }
 
 .resource-manager.showing-true {
