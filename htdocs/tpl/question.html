@@ -74,33 +74,34 @@
 		</div>
 	</div>
 
-	<div ng-if="(question.wantjustification !== 'Yes') && question.justificationnote" ng-bind-html="question.justificationnote | markdown"></div>
+	<div class="evidence_sections">
 
-	<div ng-if="question.wantjustification == 'Yes'" class="justification">
-		<notes ng-if="!anonymous && !(config.hide_notes == 'TRUE')" field="'justification'" />
+		<div ng-if="(question.wantjustification !== 'Yes') && question.justificationnote" ng-bind-html="question.justificationnote | markdown"></div>
 
-		<h4 ng-if="question.type !== 'Description'">{{ config.justification_note ? config.justification_note : "Justification and sources (include URLs)" }}</h4>
+		<div ng-if="question.wantjustification == 'Yes'" class="justification examples-{{question.wantexamples}}">
+			<h4 ng-if="question.type !== 'Description'">{{ config.justification_note ? config.justification_note : "Justification and sources (include URLs)" }}</h4> 
+			<notes ng-if="!anonymous && !(config.hide_notes == 'TRUE')" field="'justification'" />
 
-		<div ng-if="question.justificationnote" ng-bind-html="question.justificationnote | markdown"></div>
+			<div ng-if="question.justificationnote" ng-bind-html="question.justificationnote | markdown"></div> 
 
-		<textarea ng-model="response.justification" ng-if="!readOnly && !commentOnly"></textarea>
+			<textarea ng-model="response.justification" ng-if="!readOnly && !commentOnly"></textarea>
+			<h4 ng-if="(readOnly || commentOnly) && response.justification">Justification response:</h4>
+			<div class="justification-response" ng-if="(readOnly || commentOnly) && response.justification" ng-bind-html="response.justification | markdown"></div>
+		</div>
 
-		<h4 ng-if="(readOnly || commentOnly) && response.justification">Justification response:</h4>
-		<div class="justification-response" ng-if="(readOnly || commentOnly) && response.justification" ng-bind-html="response.justification | markdown"></div>
-	</div>
+		<div ng-if="question.wantexamples == 'Yes'" class="examples justification-{{question.wantjustification}}">
+	            
+			<label>
+				<h4 ng-hide="readOnly || commentOnly">Attach supporting evidence:</h4>
+				<span ng-hide="readOnly || commentOnly">Use the title field to provide page/section references if required.</span>
+				<span ng-if="(readOnly || commentOnly) && response.example.length">Supporting evidence</span>
 
-	<div ng-if="question.wantexamples == 'Yes'" class="examples">
-            
-		<label>
-			<h4 ng-hide="readOnly || commentOnly">Attach supporting evidence:</h4>
-			<span ng-hide="readOnly || commentOnly">Use the title field to provide page/section references if required.</span>
-			<span ng-if="(readOnly || commentOnly) && response.example.length">Supporting evidence</span>
-
-			<flexible-list collection="response.example" at-least="0" ng-disabled="readOnly || commentOnly" />
-			<p class="description">Note: Any uploaded files will be saved on your Google Drive and will be publicly accessible.</p>
-			<resource-manager />
-		</label>
- 
+				<flexible-list collection="response.example" at-least="0" ng-disabled="readOnly || commentOnly" />
+				<p class="description">Note: Any uploaded files will be saved on your Google Drive and will be publicly accessible.</p>
+				<resource-manager />
+			</label>
+	 
+		</div>
 	</div>
 
 	<div ng-if="question.hasprivatenotes == 'Yes'" class="private-notes">
