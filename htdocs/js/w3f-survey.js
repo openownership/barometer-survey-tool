@@ -1147,7 +1147,11 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
           $scope.areResourcesVisible = true
         }
         $scope.closeResources = function () {
-          $scope.areResourcesVisible = false
+          $timeout(function () {
+            $scope.$apply(function () {
+              $scope.areResourcesVisible = false
+            })
+          }, 1);
         }
         $rootScope.$watchCollection('uploads', function () {
           $scope.uploads = Object.values($rootScope.uploads)
@@ -1712,7 +1716,7 @@ angular.module('W3FWIS', ['GoogleSpreadsheets', 'GoogleDrive', 'W3FSurveyLoader'
     }
 
     function safeInit() {
-      if (typeof(gapi) == 'undefined') {
+      if (typeof (gapi) == 'undefined') {
         console.log('checking again for gapi in 1s')
         setTimeout(safeInit, 1000)
       } else {
