@@ -1,22 +1,64 @@
 <div class="uploadable-url">
-	<div ng-hide="disabled || model.locked">
-		<input type="text" ng-model="model.title" ng-show="model.uploaded" placeholder="{{ placeholder }}" />
 
-		<div class="uploadable-url-url">
-			<input type="text" ng-model="model.url" ng-disabled="disabled || model.locked" placeholder="File location" ng-hide="model.locked || !model.uploaded" />
+  <div ng-hide="disabled || model.locked">
 
-			<div class="uploadable-url-upload" ng-if="!model.locked && !disabled">
-				<label class="button">
-					{{ uploadState || "Upload..." }}
-					<input type="file" onchange="angular.element(this).scope().upload(this)" ng-disabled="model.uploading" />
-				</label>
-			</div>
-		</div>
-	</div>
-	<div class="uploadable-url-preview-url" ng-if="model.locked">
-		<input type="text" ng-model="model.title" ng-show="model.uploaded && !(disabled)" placeholder="{{ placeholder }}" />
-		<a class="uploadable-url-preview-url" href="{{ model.url }}" ng-if="disabled" target="uploadedPreview">{{ model.title }}</a>
-		<span class="uploadable-url-preview-url"><a href="{{ model.url }}" target="_blank">{{ model.url }}</a></span>
-	</div>
+
+    <div>
+      <label for="title">
+        <span role="img" aria-label="Title">✏️</span> <input type="text" name="title" ng-model="model.title"
+          placeholder="Please first provide a title for this {{model.category}}" />
+      </label>
+    </div>
+
+
+
+
+    <div ng-if="uploads.availableOptions.length > 0 && model.category == 'existing resource'">
+      <label for="repeatSelect">Select existing attachment: </label>
+      <select name="upload-select" id="upload-select" ng-change="onChangeUploadSelect()"
+        ng-options="option.title for option in uploads.availableOptions track by option.url"
+        ng-model="uploads.model"></select>
+    </div>
+
+    <div ng-if="model.category == 'url'">
+      <form ng-submit="onClickURLSubmit()">
+        <label><span role="img" aria-label="URL">🔗</span> <input type="text" name="url" ng-model="model.url"
+            placeholder="Then make sure the url starts with https:// or http://" /></label>
+        <input type="submit" value="Attach URL"
+          ng-disabled="!model.url || !model.url.includes('http')" />
+      </form>
+    </div>
+
+    <div class="uploadable-url-url" ng-if="model.category == 'file'">
+      <div class="uploadable-url-upload" ng-if="!model.locked && !disabled">
+
+        <label class="button" ng-disabled="model.uploading || !model.title">
+          {{ uploadState || "Then select file to upload..." }}
+          <input type="file" onchange="angular.element(this).scope().upload(this)"
+            ng-disabled="model.uploading || !model.title" />
+        </label>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="uploadable-url-preview-url" ng-if="model.locked && !isResourceManager">
+    <label>Title: <input type="text" ng-model="model.title"
+        placeholder="Give the {{model.category}} a descriptive label" /></label><br />
+    Resource: <a class="uploadable-url-preview-url" href="{{ model.url }}" ng-if="disabled"
+      target="uploadedPreview">{{ model.title }}</a>
+    <span class="uploadable-url-preview-url"><a href="{{ model.url }}" target="_blank">{{ model.url }}</a></span>
+  </div>
+
+  <div class="uploadable-url-preview-url" ng-if="model.locked && isResourceManager">
+    <form ng-submit="updateUpload(model)">
+      <label>Title: <input type="text" ng-model="model.title"
+          placeholder="Give the {{model.category}} a descriptive label" ng-focus="getOriginalTitle()"
+          ng-change="handleChangedTitle()" /></label><br />
+      Resource: <a class="uploadable-url-preview-url" href="{{ model.url }}" ng-if="disabled"
+        target="uploadedPreview">{{ model.title }}</a>
+      <span class="uploadable-url-preview-url"><a href="{{ model.url }}" target="_blank">{{ model.url }}</a></span>
+      <button type="submit" ng-show="titleChanged" class="edit-button">{{editSaving ? 'Saving...' : 'Save edit' }}</button>
+    </form>
+  </div>
 </div>
-
